@@ -18,7 +18,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
           <Image
-            src="/app/icon.png"
+            src="/images/logo-green.png"
             alt="Handygo logo"
             width={32}
             height={32}
