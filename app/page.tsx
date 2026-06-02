@@ -100,144 +100,77 @@ function StepBadge({ n }: { n: number }) {
   );
 }
 
-// Service names match exactly the seed data in backend/prisma/seed.ts
-// image paths are ready for real images — drop the file and it works automatically
+// Service names and images match Flutter app kServiceCategories in service_data.dart
 const SERVICES = [
   {
-    name: "AC Technician",
+    name: "AC Help",
     desc: "Air conditioning installation, repair & maintenance",
-    image: "/images/service-ac-technician.jpg",
+    image: "/images/services/ac.jpg",
     gradient: "from-cyan-50 to-teal-100",
     accent: "#0891b2",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <rect x="2" y="3" width="20" height="7" rx="2" />
-        <path d="M17 10v5a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-5" />
-        <path d="M12 17v4M8 21h8" />
-      </svg>
-    ),
-  },
-  {
-    name: "Electrician",
-    desc: "Electrical wiring, fuse boards, fixtures & repairs",
-    image: "/images/service-electrician.jpg",
-    gradient: "from-yellow-50 to-amber-100",
-    accent: "#d97706",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-      </svg>
-    ),
-  },
-  {
-    name: "Plumber",
-    desc: "Pipe fitting, leaks, drains & plumbing fixtures",
-    image: "/images/service-plumber.jpg",
-    gradient: "from-blue-50 to-sky-100",
-    accent: "#2563eb",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <path d="M12 2a5 5 0 0 1 5 5c0 3-5 11-5 11S7 10 7 7a5 5 0 0 1 5-5z" />
-        <circle cx="12" cy="7" r="2" />
-      </svg>
-    ),
-  },
-  {
-    name: "Handyman",
-    desc: "General home repairs, assembly & odd jobs",
-    image: "/images/service-handyman.jpg",
-    gradient: "from-orange-50 to-amber-100",
-    accent: "#DB6234",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-      </svg>
-    ),
-  },
-  {
-    name: "Cleaning",
-    desc: "Deep cleaning, housekeeping & sanitisation",
-    image: "/images/service-cleaning.jpg",
-    gradient: "from-emerald-50 to-green-100",
-    accent: "#059669",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <path d="M3 7h18M5 7V5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v2" />
-        <path d="M19 7l-1 12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7" />
-        <path d="M10 11v6M14 11v6" />
-      </svg>
-    ),
-  },
-  {
-    name: "Painter",
-    desc: "Interior & exterior painting and finishing",
-    image: "/images/service-painter.jpg",
-    gradient: "from-rose-50 to-pink-100",
-    accent: "#e11d48",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <path d="M2 13.5V20a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-2h10v2a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-6.5" />
-        <path d="M4 13V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6" />
-        <line x1="12" y1="5" x2="12" y2="13" />
-      </svg>
-    ),
-  },
-  {
-    name: "Carpenter",
-    desc: "Furniture, woodwork & carpentry repairs",
-    image: "/images/service-carpenter.jpg",
-    gradient: "from-stone-50 to-amber-50",
-    accent: "#92400e",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <rect x="3" y="3" width="18" height="4" rx="1" />
-        <rect x="3" y="10" width="18" height="4" rx="1" />
-        <rect x="3" y="17" width="18" height="4" rx="1" />
-      </svg>
-    ),
   },
   {
     name: "Pest Control",
     desc: "Pest extermination & prevention treatments",
-    image: "/images/service-pest-control.jpg",
+    image: "/images/services/pest.png",
     gradient: "from-lime-50 to-green-100",
     accent: "#4d7c0f",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-      </svg>
-    ),
+  },
+  {
+    name: "Handyman",
+    desc: "General home repairs, assembly & odd jobs",
+    image: "/images/services/handyman.jpg",
+    gradient: "from-orange-50 to-amber-100",
+    accent: "#DB6234",
+  },
+  {
+    name: "Deep Cleaning",
+    desc: "Deep cleaning, housekeeping & sanitisation",
+    image: "/images/services/deepcleaning.png",
+    gradient: "from-emerald-50 to-green-100",
+    accent: "#059669",
+  },
+  {
+    name: "Paint / Painter",
+    desc: "Interior & exterior painting and finishing",
+    image: "/images/services/painting.jpg",
+    gradient: "from-rose-50 to-pink-100",
+    accent: "#e11d48",
+  },
+  {
+    name: "Plumbing",
+    desc: "Pipe fitting, leaks, drains & plumbing fixtures",
+    image: "/images/services/plumber.jpg",
+    gradient: "from-blue-50 to-sky-100",
+    accent: "#2563eb",
+  },
+  {
+    name: "Electrical",
+    desc: "Electrical wiring, fuse boards, fixtures & repairs",
+    image: "/images/services/electrician.jpg",
+    gradient: "from-yellow-50 to-amber-100",
+    accent: "#d97706",
+  },
+  {
+    name: "Carpentry",
+    desc: "Furniture, woodwork & carpentry repairs",
+    image: "/images/services/carpenter.jpg",
+    gradient: "from-stone-50 to-amber-50",
+    accent: "#92400e",
+  },
+  {
+    name: "Gardening",
+    desc: "Garden maintenance, lawn care & landscaping",
+    image: "/images/services/gardening.jpg",
+    gradient: "from-green-50 to-emerald-100",
+    accent: "#15803d",
   },
   {
     name: "Car Wash",
     desc: "Professional car washing & detailing at home",
-    image: "/images/service-car-wash.jpg",
+    image: "/images/services/carwash.png",
     gradient: "from-sky-50 to-blue-100",
     accent: "#0284c7",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2" />
-        <circle cx="7" cy="17" r="2" />
-        <circle cx="17" cy="17" r="2" />
-        <path d="M9 7V3M15 7V3" />
-      </svg>
-    ),
-  },
-  {
-    name: "Gardener",
-    desc: "Garden maintenance, lawn care & landscaping",
-    image: "/images/service-gardener.jpg",
-    gradient: "from-green-50 to-emerald-100",
-    accent: "#15803d",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-        <path d="M12 22V12" />
-        <path d="M5 12C5 8 8 5 12 5s7 3 7 7" />
-        <path d="M5 12c0-3 2-6 7-7" />
-        <path d="M19 12c0-3-2-6-7-7" />
-      </svg>
-    ),
   },
 ];
 
@@ -267,29 +200,25 @@ function ServicesSection() {
           {SERVICES.map((svc) => (
             <div
               key={svc.name}
-              className={`relative rounded-2xl overflow-hidden bg-gradient-to-br ${svc.gradient} p-5 flex flex-col gap-3`}
+              className="relative rounded-2xl overflow-hidden bg-white shadow-sm border border-zinc-100 flex flex-col"
             >
-              {/* Icon area — swappable with <Image> once real images arrive */}
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: "rgba(255,255,255,0.7)", color: svc.accent }}
-              >
-                {svc.icon}
+              {/* Service image */}
+              <div className="relative w-full h-36 overflow-hidden">
+                <Image
+                  src={svc.image}
+                  alt={svc.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                />
               </div>
 
-              <div>
+              <div className="p-4">
                 <p className="font-semibold text-zinc-900 text-sm leading-tight">{svc.name}</p>
                 <p className="text-xs mt-1 leading-relaxed" style={{ color: svc.accent }}>
                   {svc.desc}
                 </p>
               </div>
-
-              {/* Subtle brand corner accent */}
-              <div
-                aria-hidden
-                className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full opacity-10"
-                style={{ background: svc.accent }}
-              />
             </div>
           ))}
         </div>

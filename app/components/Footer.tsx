@@ -18,7 +18,7 @@ export default function Footer() {
                 alt="Handygo logo"
                 width={36}
                 height={36}
-                className="rounded-xl"
+                className="rounded-xl object-contain"
               />
               <span className="text-white font-bold text-xl tracking-tight">Handygo</span>
             </Link>
