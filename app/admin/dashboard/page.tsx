@@ -11,28 +11,17 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
-type PendingWorker = {
-  id: string;
-};
-
-const API_BASE_URL =
-  "https://handygo-production-jqi9i.ondigitalocean.app/api/v1";
+import { adminFetch, clearAdminSession, type AdminStats } from "@/lib/api/admin";
 
 const AdminDashboardPage = () => {
   const router = useRouter();
 
-  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const handleLogout = () => {
-    localStorage.removeItem("handygo_access_token");
-    localStorage.removeItem("handygo_refresh_token");
-    localStorage.removeItem("handygo_role");
-    localStorage.removeItem("handygo_user");
-    localStorage.removeItem("handygo_last_active");
-
+    clearAdminSession();
     router.push("/auth/login");
   };
 
@@ -55,31 +44,11 @@ const AdminDashboardPage = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/workers/pending`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      let data = null;
-
-      try {
-        data = await response.json();
-      } catch {
-        data = null;
-      }
-
-      if (!response.ok) {
-        setError(data?.message || "Failed to load dashboard data.");
-        return;
-      }
-
-      const workers: PendingWorker[] = data?.data || data || [];
-      setPendingCount(workers.length);
+      const data = await adminFetch<AdminStats>("/admin/stats");
+      setStats(data);
     } catch (err) {
       console.log("Dashboard fetch error:", err);
-      setError("Server error. Please try again.");
+      setError(err instanceof Error ? err.message : "Server error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -133,7 +102,7 @@ const AdminDashboardPage = () => {
               <div>
                 <p className="text-gray-500 text-sm">Pending Ustaads</p>
                 <h2 className="text-3xl font-bold mt-1">
-                  {loading ? "..." : pendingCount}
+                  {loading ? "..." : stats?.pendingUstaads ?? "—"}
                 </h2>
               </div>
 
@@ -147,10 +116,9 @@ const AdminDashboardPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm">Approved Ustaads</p>
-                <h2 className="text-3xl font-bold mt-1">—</h2>
-                <p className="text-xs text-gray-400 mt-1">
-                  Stats API needed
-                </p>
+                <h2 className="text-3xl font-bold mt-1">
+                  {loading ? "..." : stats?.approvedUstaads ?? "—"}
+                </h2>
               </div>
 
               <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
@@ -163,10 +131,9 @@ const AdminDashboardPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-500 text-sm">Total Users</p>
-                <h2 className="text-3xl font-bold mt-1">—</h2>
-                <p className="text-xs text-gray-400 mt-1">
-                  Stats API needed
-                </p>
+                <h2 className="text-3xl font-bold mt-1">
+                  {loading ? "..." : stats?.totalUsers ?? "—"}
+                </h2>
               </div>
 
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">

@@ -1,61 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Check, X, UserCheck } from "lucide-react";
+import { ArrowLeft, UserCheck, LogOut, FileText, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
-type PendingWorker = {
-    id: string;
-    userId: string;
-    phone: string;
-    firstName: string;
-    lastName: string;
-    bio?: string | null;
-    avatarUrl?: string | null;
-    status: string;
-    verificationStatus: string;
-    skills: {
-        id: string;
-        yearsExperience: number;
-        category: {
-            id: string;
-            name: string;
-        };
-    }[];
-    documents: {
-        id: string;
-        type: string;
-        fileUrl: string;
-        fileName?: string | null;
-        mimeType?: string | null;
-        verifiedAt?: string | null;
-        createdAt: string;
-    }[];
-    createdAt: string;
-};
-
-const API_BASE_URL =
-    "https://handygo-production-jqi9i.ondigitalocean.app/api/v1";
+import { adminFetch, clearAdminSession, type WorkerProfile } from "@/lib/api/admin";
 
 const AdminUstaadsPage = () => {
     const router = useRouter();
 
-    const [pendingWorkers, setPendingWorkers] = useState<PendingWorker[]>([]);
+    const [pendingWorkers, setPendingWorkers] = useState<WorkerProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [checkingAuth, setCheckingAuth] = useState(true);
     const [isAllowed, setIsAllowed] = useState(false);
     const [error, setError] = useState("");
-    const [actionLoadingId, setActionLoadingId] = useState("");
-    const handleLogout = () => {
-        localStorage.removeItem("handygo_access_token");
-        localStorage.removeItem("handygo_refresh_token");
-        localStorage.removeItem("handygo_role");
-        localStorage.removeItem("handygo_user");
-        localStorage.removeItem("handygo_last_active");
 
+    const handleLogout = () => {
+        clearAdminSession();
         router.push("/auth/login");
     };
+
+    const fetchPendingWorkers = async () => {
+        setLoading(true);
+        setError("");
+
+        try {
+            const data = await adminFetch<WorkerProfile[]>("/admin/workers/pending");
+            setPendingWorkers(data || []);
+        } catch (err) {
+            console.log(err);
+            setError(err instanceof Error ? err.message : "Failed to load pending Ustaads.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         const token = localStorage.getItem("handygo_access_token");
         const role = localStorage.getItem("handygo_role");
@@ -74,132 +53,12 @@ const AdminUstaadsPage = () => {
 
         setIsAllowed(true);
         setCheckingAuth(false);
-        fetchPendingWorkers(token);
+        fetchPendingWorkers();
     }, [router]);
 
-    const safeJson = async (response: Response) => {
-        try {
-            return await response.json();
-        } catch {
-            return null;
-        }
-    };
-
-    const fetchPendingWorkers = async (tokenFromEffect?: string) => {
-        setLoading(true);
-        setError("");
-
-        const token =
-            tokenFromEffect || localStorage.getItem("handygo_access_token");
-
-        if (!token) {
-            setError("Please login again.");
-            setLoading(false);
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/admin/workers/pending`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            const data = await safeJson(response);
-
-            if (!response.ok) {
-                setError(data?.message || "Failed to load pending Ustaads.");
-                return;
-            }
-
-            setPendingWorkers(data?.data || data || []);
-        } catch (err) {
-            console.log(err);
-            setError("Server error. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleApprove = async (id: string) => {
-        const token = localStorage.getItem("handygo_access_token");
-
-        if (!token) {
-            setError("Please login again.");
-            return;
-        }
-
-        setActionLoadingId(id);
-        setError("");
-
-        try {
-            const response = await fetch(
-                `${API_BASE_URL}/admin/workers/${id}/approve`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            const data = await safeJson(response);
-
-            if (!response.ok) {
-                setError(data?.message || "Failed to approve Ustaad.");
-                return;
-            }
-
-            setPendingWorkers((prev) => prev.filter((worker) => worker.id !== id));
-        } catch (err) {
-            console.log(err);
-            setError("Server error. Please try again.");
-        } finally {
-            setActionLoadingId("");
-        }
-    };
-
-    const handleReject = async (id: string) => {
-        const confirmReject = confirm("Are you sure you want to reject this Ustaad?");
-
-        if (!confirmReject) return;
-
-        const token = localStorage.getItem("handygo_access_token");
-
-        if (!token) {
-            setError("Please login again.");
-            return;
-        }
-
-        setActionLoadingId(id);
-        setError("");
-
-        try {
-            const response = await fetch(
-                `${API_BASE_URL}/admin/workers/${id}/reject`,
-                {
-                    method: "PATCH",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            const data = await safeJson(response);
-
-            if (!response.ok) {
-                setError(data?.message || "Failed to reject Ustaad.");
-                return;
-            }
-
-            setPendingWorkers((prev) => prev.filter((worker) => worker.id !== id));
-        } catch (err) {
-            console.log(err);
-            setError("Server error. Please try again.");
-        } finally {
-            setActionLoadingId("");
-        }
+    const documentCount = (worker: WorkerProfile) => {
+        const docs = [worker.cnicFrontUrl, worker.cnicBackUrl, worker.liveSelfieUrl];
+        return docs.filter(Boolean).length;
     };
 
     if (checkingAuth) {
@@ -268,7 +127,8 @@ const AdminUstaadsPage = () => {
                                 Pending Ustaads
                             </h1>
                             <p className="text-gray-600 mt-1">
-                                Approve or reject newly registered Handygo Ustaads.
+                                Review submitted documents and agreements before approving or
+                                rejecting newly registered Handygo Ustaads.
                             </p>
                         </div>
                     </div>
@@ -311,7 +171,10 @@ const AdminUstaadsPage = () => {
                                                 Phone
                                             </th>
                                             <th className="px-5 py-4 text-sm font-semibold text-gray-600">
-                                                Skills
+                                                Main Skill
+                                            </th>
+                                            <th className="px-5 py-4 text-sm font-semibold text-gray-600">
+                                                CNIC Number
                                             </th>
                                             <th className="px-5 py-4 text-sm font-semibold text-gray-600">
                                                 Documents
@@ -320,10 +183,10 @@ const AdminUstaadsPage = () => {
                                                 Status
                                             </th>
                                             <th className="px-5 py-4 text-sm font-semibold text-gray-600">
-                                                Registered
+                                                Submitted Date
                                             </th>
                                             <th className="px-5 py-4 text-sm font-semibold text-gray-600">
-                                                Actions
+                                                Action
                                             </th>
                                         </tr>
                                     </thead>
@@ -338,11 +201,6 @@ const AdminUstaadsPage = () => {
                                                     <p className="font-semibold text-gray-900">
                                                         {worker.firstName} {worker.lastName}
                                                     </p>
-                                                    {worker.bio && (
-                                                        <p className="text-xs text-gray-500 mt-1 max-w-[220px] truncate">
-                                                            {worker.bio}
-                                                        </p>
-                                                    )}
                                                 </td>
 
                                                 <td className="px-5 py-4 text-gray-600">
@@ -350,62 +208,48 @@ const AdminUstaadsPage = () => {
                                                 </td>
 
                                                 <td className="px-5 py-4">
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {worker.skills.length > 0 ? (
-                                                            worker.skills.map((skill) => (
-                                                                <span
-                                                                    key={skill.id}
-                                                                    className="bg-orange-50 text-[var(--brand)] text-xs font-semibold px-3 py-1 rounded-full"
-                                                                >
-                                                                    {skill.category.name}
-                                                                </span>
-                                                            ))
-                                                        ) : (
-                                                            <span className="text-gray-400 text-sm">
-                                                                No skills
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                                    {worker.skills?.length > 0 ? (
+                                                        <span className="bg-orange-50 text-[var(--brand)] text-xs font-semibold px-3 py-1 rounded-full">
+                                                            {worker.skills[0].category.name}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-gray-400 text-sm">
+                                                            No skill
+                                                        </span>
+                                                    )}
                                                 </td>
 
                                                 <td className="px-5 py-4 text-gray-600">
-                                                    {worker.documents?.length || 0} documents
+                                                    {worker.cnicNumber || "—"}
+                                                </td>
+
+                                                <td className="px-5 py-4 text-gray-600">
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <FileText className="w-4 h-4 text-gray-400" />
+                                                        {documentCount(worker)} / 3 documents
+                                                    </span>
                                                 </td>
 
                                                 <td className="px-5 py-4">
                                                     <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-3 py-1 rounded-full">
-                                                        {worker.verificationStatus}
+                                                        {worker.onboardingStatus || "—"}
                                                     </span>
                                                 </td>
 
                                                 <td className="px-5 py-4 text-gray-600">
-                                                    {new Date(worker.createdAt).toLocaleDateString()}
+                                                    {new Date(
+                                                        worker.submittedForReviewAt || worker.createdAt
+                                                    ).toLocaleDateString()}
                                                 </td>
 
                                                 <td className="px-5 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => handleApprove(worker.id)}
-                                                            disabled={actionLoadingId === worker.id}
-                                                            className="inline-flex items-center gap-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-sm font-semibold"
-                                                        >
-                                                            <Check className="w-4 h-4" />
-                                                            {actionLoadingId === worker.id
-                                                                ? "Approving..."
-                                                                : "Approve"}
-                                                        </button>
-
-                                                        <button
-                                                            onClick={() => handleReject(worker.id)}
-                                                            disabled={actionLoadingId === worker.id}
-                                                            className="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-3 py-2 rounded-lg text-sm font-semibold"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                            {actionLoadingId === worker.id
-                                                                ? "Rejecting..."
-                                                                : "Reject"}
-                                                        </button>
-                                                    </div>
+                                                    <Link
+                                                        href={`/admin/ustaads/${worker.id}`}
+                                                        className="inline-flex items-center gap-1 bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white px-3 py-2 rounded-lg text-sm font-semibold"
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                        View Details
+                                                    </Link>
                                                 </td>
                                             </tr>
                                         ))}
