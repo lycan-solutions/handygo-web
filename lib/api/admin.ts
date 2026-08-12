@@ -96,9 +96,13 @@ export type WorkerProfile = {
   skills: WorkerSkill[];
   documents: WorkerDocument[];
   createdAt: string;
+  updatedAt: string;
   fullLegalName?: string | null;
   cnicNumber?: string | null;
   residentialAddress?: string | null;
+  fatherName?: string | null;
+  dateOfBirth?: string | null;
+  emergencyContact?: string | null;
   cnicFrontUrl?: string | null;
   cnicBackUrl?: string | null;
   liveSelfieUrl?: string | null;
@@ -114,6 +118,115 @@ export type WorkerProfile = {
   changesRequiredReason?: string | null;
   rejectionReason?: string | null;
 };
+
+// ── Ustaads List ────────────────────────────────────────────────────────────
+
+export type WorkerListItem = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  avatarUrl: string | null;
+  primarySkill: string | null;
+  status: string;
+  onboardingStatus: string;
+  verificationStatus: string;
+  createdAt: string;
+};
+
+export type PaginationMeta = {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+};
+
+export type PaginatedWorkers = {
+  items: WorkerListItem[];
+  meta: PaginationMeta;
+};
+
+export type ServiceCategory = {
+  id: string;
+  name: string;
+  description?: string | null;
+  iconUrl?: string | null;
+};
+
+export type ListWorkersParams = {
+  search?: string;
+  status?: string;
+  onboardingStatus?: string;
+  verificationStatus?: string;
+  categoryId?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export async function fetchWorkers(params: ListWorkersParams): Promise<PaginatedWorkers> {
+  const qs = new URLSearchParams();
+  if (params.search?.trim()) qs.set("search", params.search.trim());
+  if (params.status) qs.set("status", params.status);
+  if (params.onboardingStatus) qs.set("onboardingStatus", params.onboardingStatus);
+  if (params.verificationStatus) qs.set("verificationStatus", params.verificationStatus);
+  if (params.categoryId) qs.set("categoryId", params.categoryId);
+  qs.set("page", String(params.page ?? 1));
+  qs.set("pageSize", String(params.pageSize ?? 20));
+
+  return adminFetch<PaginatedWorkers>(`/admin/workers?${qs.toString()}`);
+}
+
+/** GET /categories is public (no admin auth required) but shares the same base URL/JSON envelope. */
+export async function fetchServiceCategories(): Promise<ServiceCategory[]> {
+  return adminFetch<ServiceCategory[]>(`/categories`);
+}
+
+export async function updateWorkerStatus(
+  workerProfileId: string,
+  status: string
+): Promise<WorkerProfile> {
+  return adminFetch<WorkerProfile>(`/admin/workers/${workerProfileId}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export type UpdateWorkerProfileFields = Partial<{
+  firstName: string;
+  lastName: string;
+  fullLegalName: string;
+  cnicNumber: string;
+  residentialAddress: string;
+  fatherName: string;
+  dateOfBirth: string;
+  emergencyContact: string;
+}>;
+
+export async function updateWorkerProfileFields(
+  workerProfileId: string,
+  data: UpdateWorkerProfileFields
+): Promise<WorkerProfile> {
+  return adminFetch<WorkerProfile>(`/admin/workers/${workerProfileId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateWorkerSkills(
+  workerProfileId: string,
+  categoryIds: string[],
+  yearsExperience?: number
+): Promise<WorkerProfile> {
+  return adminFetch<WorkerProfile>(`/admin/workers/${workerProfileId}/skills`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      categoryIds,
+      ...(yearsExperience !== undefined ? { yearsExperience } : {}),
+    }),
+  });
+}
+
+export const WORKER_STATUSES = ["ACTIVE", "INACTIVE", "SUSPENDED"] as const;
 
 export type WorkerAgreement = {
   id: string;

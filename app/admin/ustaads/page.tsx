@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, UserCheck, LogOut, FileText, Eye } from "lucide-react";
+import { UserCheck, FileText, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { adminFetch, clearAdminSession, type WorkerProfile } from "@/lib/api/admin";
+import { adminFetch, type WorkerProfile } from "@/lib/api/admin";
 
 const AdminUstaadsPage = () => {
     const router = useRouter();
@@ -14,11 +14,6 @@ const AdminUstaadsPage = () => {
     const [checkingAuth, setCheckingAuth] = useState(true);
     const [isAllowed, setIsAllowed] = useState(false);
     const [error, setError] = useState("");
-
-    const handleLogout = () => {
-        clearAdminSession();
-        router.push("/auth/login");
-    };
 
     const fetchPendingWorkers = async () => {
         setLoading(true);
@@ -63,19 +58,19 @@ const AdminUstaadsPage = () => {
 
     if (checkingAuth) {
         return (
-            <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+            <div className="p-4 md:p-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
                         <p className="text-gray-500">Checking access...</p>
                     </div>
                 </div>
-            </main>
+            </div>
         );
     }
 
     if (!isAllowed) {
         return (
-            <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+            <div className="p-4 md:p-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
                         <h1 className="text-2xl font-bold text-gray-900">Not authorized</h1>
@@ -91,31 +86,13 @@ const AdminUstaadsPage = () => {
                         </Link>
                     </div>
                 </div>
-            </main>
+            </div>
         );
     }
 
     return (
-        <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+        <div className="p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
-                <div className="flex items-center justify-between mb-6">
-                    <Link
-                        href="/admin/dashboard"
-                        className="inline-flex items-center gap-2 text-gray-600 hover:text-[var(--brand)]"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Dashboard
-                    </Link>
-
-                    <button
-                        onClick={handleLogout}
-                        className="inline-flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:text-red-600 hover:border-red-200 px-4 py-2 rounded-lg font-semibold shadow-sm"
-                    >
-                        <LogOut className="w-4 h-4" />
-                        Logout
-                    </button>
-                </div>
-
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
@@ -260,7 +237,7 @@ const AdminUstaadsPage = () => {
                     </div>
                 )}
             </div>
-        </main>
+        </div>
     );
 };
 

@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft,
-    LogOut,
     CheckCircle2,
     XCircle,
     AlertTriangle,
@@ -14,37 +13,44 @@ import {
     FileText,
     ShieldCheck,
     GraduationCap,
+    Pencil,
+    Save,
+    X,
+    ShieldAlert,
 } from "lucide-react";
 import {
     adminFetch,
-    clearAdminSession,
+    updateWorkerStatus,
+    updateWorkerProfileFields,
+    updateWorkerSkills,
+    fetchServiceCategories,
     FACE_MATCH_STATUSES,
     TRAINING_STATUSES,
+    WORKER_STATUSES,
     type WorkerProfile,
     type WorkerAgreement,
+    type ServiceCategory,
 } from "@/lib/api/admin";
+import StatusBadge from "@/components/admin/StatusBadge";
+import AvatarThumb from "@/components/admin/AvatarThumb";
+import ImageLightbox from "@/components/admin/ImageLightbox";
 
 type ReasonModalState = {
     type: "changes" | "reject";
     reason: string;
 } | null;
 
-const statusBadgeClasses = (status?: string | null) => {
-    const value = (status || "").toUpperCase();
-
-    if (["APPROVED", "COMPLETED", "MATCHED", "VERIFIED"].includes(value)) {
-        return "bg-green-100 text-green-700";
-    }
-    if (["REJECTED", "NOT_MATCHED"].includes(value)) {
-        return "bg-red-100 text-red-700";
-    }
-    if (["CHANGES_REQUIRED", "NEEDS_REVIEW", "NEEDS_RETRAINING", "INVITED"].includes(value)) {
-        return "bg-amber-100 text-amber-700";
-    }
-    if (!value) {
-        return "bg-gray-100 text-gray-600";
-    }
-    return "bg-yellow-100 text-yellow-700";
+type EditForm = {
+    firstName: string;
+    lastName: string;
+    fullLegalName: string;
+    cnicNumber: string;
+    residentialAddress: string;
+    fatherName: string;
+    dateOfBirth: string;
+    emergencyContact: string;
+    categoryId: string;
+    yearsExperience: string;
 };
 
 const formatDate = (value?: string | null) => {
@@ -53,6 +59,19 @@ const formatDate = (value?: string | null) => {
     if (Number.isNaN(date.getTime())) return "—";
     return date.toLocaleString();
 };
+
+const buildForm = (worker: WorkerProfile): EditForm => ({
+    firstName: worker.firstName ?? "",
+    lastName: worker.lastName ?? "",
+    fullLegalName: worker.fullLegalName ?? "",
+    cnicNumber: worker.cnicNumber ?? "",
+    residentialAddress: worker.residentialAddress ?? "",
+    fatherName: worker.fatherName ?? "",
+    dateOfBirth: worker.dateOfBirth ?? "",
+    emergencyContact: worker.emergencyContact ?? "",
+    categoryId: worker.skills?.[0]?.category.id ?? "",
+    yearsExperience: worker.skills?.[0] ? String(worker.skills[0].yearsExperience) : "",
+});
 
 const AdminUstaadDetailPage = () => {
     const router = useRouter();
@@ -64,6 +83,7 @@ const AdminUstaadDetailPage = () => {
 
     const [worker, setWorker] = useState<WorkerProfile | null>(null);
     const [agreements, setAgreements] = useState<WorkerAgreement[]>([]);
+    const [categories, setCategories] = useState<ServiceCategory[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
@@ -74,10 +94,18 @@ const AdminUstaadDetailPage = () => {
     const [reasonModal, setReasonModal] = useState<ReasonModalState>(null);
     const [reasonError, setReasonError] = useState("");
 
-    const handleLogout = () => {
-        clearAdminSession();
-        router.push("/auth/login");
-    };
+    // Worker Status management
+    const [pendingStatus, setPendingStatus] = useState("");
+    const [statusModalTarget, setStatusModalTarget] = useState<string | null>(null);
+    const [statusSaving, setStatusSaving] = useState(false);
+
+    // Edit mode
+    const [editing, setEditing] = useState(false);
+    const [form, setForm] = useState<EditForm | null>(null);
+    const [savingProfile, setSavingProfile] = useState(false);
+
+    // Document lightbox
+    const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null);
 
     const loadWorker = async () => {
         setLoading(true);
@@ -90,6 +118,7 @@ const AdminUstaadDetailPage = () => {
             ]);
 
             setWorker(workerData);
+            setPendingStatus(workerData.status);
             setAgreements(agreementsData || []);
         } catch (err) {
             console.log(err);
@@ -121,6 +150,9 @@ const AdminUstaadDetailPage = () => {
         if (workerId) {
             loadWorker();
         }
+        fetchServiceCategories()
+            .then(setCategories)
+            .catch(() => setCategories([]));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router, workerId]);
 
@@ -135,7 +167,6 @@ const AdminUstaadDetailPage = () => {
             await adminFetch(`/admin/workers/${workerId}/approve`, { method: "PATCH" });
             setSuccessMessage("Ustaad approved successfully.");
             await loadWorker();
-            setTimeout(() => router.push("/admin/ustaads"), 1500);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to approve Ustaad.");
         } finally {
@@ -228,21 +259,104 @@ const AdminUstaadDetailPage = () => {
         }
     };
 
+    const confirmStatusChange = async () => {
+        if (!statusModalTarget) return;
+        setStatusSaving(true);
+        setError("");
+        setSuccessMessage("");
+
+        try {
+            const updated = await updateWorkerStatus(workerId, statusModalTarget);
+            setWorker(updated);
+            setPendingStatus(updated.status);
+            setSuccessMessage(`Worker status updated to ${updated.status}.`);
+            setStatusModalTarget(null);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to update worker status.");
+        } finally {
+            setStatusSaving(false);
+        }
+    };
+
+    const startEdit = () => {
+        if (!worker) return;
+        setForm(buildForm(worker));
+        setEditing(true);
+        setError("");
+        setSuccessMessage("");
+    };
+
+    const cancelEdit = () => {
+        setEditing(false);
+        setForm(null);
+    };
+
+    const updateField = (key: keyof EditForm, value: string) => {
+        setForm((prev) => (prev ? { ...prev, [key]: value } : prev));
+    };
+
+    const saveEdit = async () => {
+        if (!form || !worker) return;
+        setSavingProfile(true);
+        setError("");
+        setSuccessMessage("");
+
+        try {
+            await updateWorkerProfileFields(workerId, {
+                firstName: form.firstName.trim(),
+                lastName: form.lastName.trim(),
+                fullLegalName: form.fullLegalName.trim() || undefined,
+                cnicNumber: form.cnicNumber.trim() || undefined,
+                residentialAddress: form.residentialAddress.trim() || undefined,
+                fatherName: form.fatherName.trim() || undefined,
+                dateOfBirth: form.dateOfBirth.trim() || undefined,
+                emergencyContact: form.emergencyContact,
+            });
+
+            const originalCategoryId = worker.skills?.[0]?.category.id ?? "";
+            const originalExperience = worker.skills?.[0]
+                ? String(worker.skills[0].yearsExperience)
+                : "";
+            if (
+                form.categoryId &&
+                (form.categoryId !== originalCategoryId || form.yearsExperience !== originalExperience)
+            ) {
+                const years = form.yearsExperience.trim()
+                    ? Number(form.yearsExperience)
+                    : undefined;
+                await updateWorkerSkills(
+                    workerId,
+                    [form.categoryId],
+                    years !== undefined && !Number.isNaN(years) ? years : undefined
+                );
+            }
+
+            setSuccessMessage("Profile updated successfully.");
+            setEditing(false);
+            setForm(null);
+            await loadWorker();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to save changes.");
+        } finally {
+            setSavingProfile(false);
+        }
+    };
+
     if (checkingAuth) {
         return (
-            <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+            <div className="p-4 md:p-8">
                 <div className="max-w-6xl mx-auto">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
                         <p className="text-gray-500">Checking access...</p>
                     </div>
                 </div>
-            </main>
+            </div>
         );
     }
 
     if (!isAllowed) {
         return (
-            <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+            <div className="p-4 md:p-8">
                 <div className="max-w-6xl mx-auto">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
                         <h1 className="text-2xl font-bold text-gray-900">Not authorized</h1>
@@ -258,7 +372,7 @@ const AdminUstaadDetailPage = () => {
                         </Link>
                     </div>
                 </div>
-            </main>
+            </div>
         );
     }
 
@@ -271,17 +385,20 @@ const AdminUstaadDetailPage = () => {
 
     const documentCards = worker
         ? [
+              { label: "Profile Photo", url: worker.avatarUrl },
+              { label: "Live Verification Selfie", url: worker.liveSelfieUrl },
               { label: "CNIC Front", url: worker.cnicFrontUrl },
               { label: "CNIC Back", url: worker.cnicBackUrl },
-              { label: "Live Selfie", url: worker.liveSelfieUrl },
           ]
         : [];
 
+    const statusChanged = worker ? pendingStatus !== worker.status : false;
+
     return (
-        <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+        <div className="p-4 md:p-8">
             <div className="max-w-6xl mx-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+                {/* Breadcrumb */}
+                <div className="mb-6">
                     <Link
                         href="/admin/ustaads"
                         className="inline-flex items-center gap-2 text-gray-600 hover:text-[var(--brand)]"
@@ -289,14 +406,6 @@ const AdminUstaadDetailPage = () => {
                         <ArrowLeft className="w-4 h-4" />
                         Back to Pending Ustaads
                     </Link>
-
-                    <button
-                        onClick={handleLogout}
-                        className="inline-flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:text-red-600 hover:border-red-200 px-4 py-2 rounded-lg font-semibold shadow-sm"
-                    >
-                        <LogOut className="w-4 h-4" />
-                        Logout
-                    </button>
                 </div>
 
                 {error && (
@@ -322,72 +431,105 @@ const AdminUstaadDetailPage = () => {
                 ) : (
                     <div className="space-y-6">
                         {/* Header card */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                            <div>
-                                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                                    {worker.firstName} {worker.lastName}
-                                </h1>
-                                <p className="text-gray-500 mt-1">{worker.phone}</p>
-                            </div>
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div className="flex items-center gap-4">
+                                    <AvatarThumb
+                                        avatarUrl={worker.avatarUrl}
+                                        firstName={worker.firstName}
+                                        lastName={worker.lastName}
+                                        size="lg"
+                                    />
+                                    <div>
+                                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                                            {worker.firstName} {worker.lastName}
+                                        </h1>
+                                        <p className="text-gray-500 mt-1">{worker.phone}</p>
+                                        <p className="text-sm text-gray-500 mt-0.5">
+                                            {worker.skills?.[0]?.category.name ?? "No skill set"} &middot; Joined{" "}
+                                            {formatDate(worker.createdAt)}
+                                        </p>
+                                    </div>
+                                </div>
 
-                            <span
-                                className={`inline-flex w-fit items-center px-4 py-2 rounded-full text-sm font-bold ${statusBadgeClasses(
-                                    worker.onboardingStatus
-                                )}`}
-                            >
-                                {worker.onboardingStatus || "UNKNOWN"}
-                            </span>
+                                {!editing ? (
+                                    <button
+                                        onClick={startEdit}
+                                        className="inline-flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:border-[var(--brand)] hover:text-[var(--brand)] px-4 py-2.5 rounded-lg font-semibold shadow-sm shrink-0"
+                                    >
+                                        <Pencil className="w-4 h-4" />
+                                        Edit Profile
+                                    </button>
+                                ) : (
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <button
+                                            onClick={cancelEdit}
+                                            disabled={savingProfile}
+                                            className="inline-flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-600 px-4 py-2.5 rounded-lg font-semibold disabled:opacity-50"
+                                        >
+                                            <X className="w-4 h-4" />
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={saveEdit}
+                                            disabled={savingProfile}
+                                            className="inline-flex items-center justify-center gap-2 bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white px-4 py-2.5 rounded-lg font-semibold disabled:opacity-50"
+                                        >
+                                            <Save className="w-4 h-4" />
+                                            {savingProfile ? "Saving..." : "Save Changes"}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        {/* Basic info */}
+                        {/* Status overview */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                            <h2 className="text-lg font-bold text-gray-900 mb-4">Basic Information</h2>
+                            <h2 className="text-lg font-bold text-gray-900 mb-4">Status Overview</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                                        Worker Status
+                                    </p>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <select
+                                            value={pendingStatus}
+                                            onChange={(e) => setPendingStatus(e.target.value)}
+                                            disabled={statusSaving}
+                                            aria-label="Worker Status"
+                                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--brand)] disabled:opacity-50 bg-white"
+                                        >
+                                            {WORKER_STATUSES.map((s) => (
+                                                <option key={s} value={s}>
+                                                    {s}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {statusChanged && (
+                                            <button
+                                                onClick={() => setStatusModalTarget(pendingStatus)}
+                                                disabled={statusSaving}
+                                                className="inline-flex items-center gap-1 bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white px-3 py-2 rounded-lg text-sm font-semibold disabled:opacity-50"
+                                            >
+                                                Save
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                                <InfoField label="Full Legal Name" value={worker.fullLegalName} />
-                                <InfoField label="CNIC Number" value={worker.cnicNumber} />
-                                <InfoField label="Phone" value={worker.phone} />
-                                <InfoField
-                                    label="Main Skill"
-                                    value={
-                                        worker.skills?.length
-                                            ? worker.skills.map((s) => s.category.name).join(", ")
-                                            : "—"
-                                    }
-                                />
-                                <InfoField
-                                    label="Experience"
-                                    value={
-                                        worker.skills?.length
-                                            ? `${worker.skills[0].yearsExperience} years`
-                                            : "—"
-                                    }
-                                />
-                                <InfoField label="Residential Address" value={worker.residentialAddress} />
-                                <InfoField
-                                    label="Submitted Date"
-                                    value={formatDate(worker.submittedForReviewAt || worker.createdAt)}
-                                />
-                                <InfoField
-                                    label="Account Status"
-                                    badge
-                                    value={worker.status}
-                                />
-                                <InfoField
-                                    label="Verification Status"
-                                    badge
-                                    value={worker.verificationStatus}
-                                />
-                                <InfoField
-                                    label="Face Match Status"
-                                    badge
-                                    value={worker.faceMatchStatus}
-                                />
-                                <InfoField
-                                    label="Training Status"
-                                    badge
-                                    value={worker.trainingStatus}
-                                />
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                                        Approval
+                                    </p>
+                                    <StatusBadge value={worker.onboardingStatus} />
+                                </div>
+
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                                        Verification
+                                    </p>
+                                    <StatusBadge value={worker.verificationStatus} />
+                                </div>
                             </div>
 
                             {worker.changesRequiredReason && (
@@ -402,23 +544,161 @@ const AdminUstaadDetailPage = () => {
                             )}
                         </div>
 
-                        {/* Documents */}
+                        {/* Personal Information */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                            <h2 className="text-lg font-bold text-gray-900 mb-4">Documents</h2>
+                            <h2 className="text-lg font-bold text-gray-900 mb-4">Personal Information</h2>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {!editing ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                                    <InfoField label="First Name" value={worker.firstName} />
+                                    <InfoField label="Last Name" value={worker.lastName} />
+                                    <InfoField label="Full Legal Name" value={worker.fullLegalName} />
+                                    <InfoField label="Registered Phone" value={worker.phone} />
+                                    <InfoField label="CNIC Number" value={worker.cnicNumber} />
+                                    <InfoField label="Father's Name" value={worker.fatherName} />
+                                    <InfoField label="Date of Birth" value={worker.dateOfBirth} />
+                                    <InfoField label="Address" value={worker.residentialAddress} />
+                                    <InfoField label="Emergency Contact" value={worker.emergencyContact} />
+                                </div>
+                            ) : (
+                                form && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <EditInput
+                                            label="First Name"
+                                            value={form.firstName}
+                                            onChange={(v) => updateField("firstName", v)}
+                                        />
+                                        <EditInput
+                                            label="Last Name"
+                                            value={form.lastName}
+                                            onChange={(v) => updateField("lastName", v)}
+                                        />
+                                        <EditInput
+                                            label="Full Legal Name"
+                                            value={form.fullLegalName}
+                                            onChange={(v) => updateField("fullLegalName", v)}
+                                        />
+                                        <div>
+                                            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                                                Registered Phone
+                                            </label>
+                                            <p
+                                                className="mt-1 w-full border border-gray-100 bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-500"
+                                                title="Phone is the account's authentication identity and cannot be changed here."
+                                            >
+                                                {worker.phone}
+                                            </p>
+                                        </div>
+                                        <EditInput
+                                            label="CNIC Number"
+                                            value={form.cnicNumber}
+                                            onChange={(v) => updateField("cnicNumber", v)}
+                                            placeholder="12345-1234567-1"
+                                        />
+                                        <EditInput
+                                            label="Father's Name"
+                                            value={form.fatherName}
+                                            onChange={(v) => updateField("fatherName", v)}
+                                        />
+                                        <EditInput
+                                            label="Date of Birth"
+                                            type="date"
+                                            value={form.dateOfBirth}
+                                            onChange={(v) => updateField("dateOfBirth", v)}
+                                        />
+                                        <EditInput
+                                            label="Address"
+                                            value={form.residentialAddress}
+                                            onChange={(v) => updateField("residentialAddress", v)}
+                                            className="sm:col-span-2 lg:col-span-2"
+                                        />
+                                        <EditInput
+                                            label="Emergency Contact"
+                                            value={form.emergencyContact}
+                                            onChange={(v) => updateField("emergencyContact", v)}
+                                        />
+                                    </div>
+                                )
+                            )}
+                        </div>
+
+                        {/* Professional Information */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="text-lg font-bold text-gray-900 mb-4">Professional Information</h2>
+
+                            {!editing ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                                    <InfoField
+                                        label="Primary Skill"
+                                        value={worker.skills?.[0]?.category.name}
+                                    />
+                                    <InfoField
+                                        label="Experience"
+                                        value={
+                                            worker.skills?.length
+                                                ? `${worker.skills[0].yearsExperience} years`
+                                                : undefined
+                                        }
+                                    />
+                                </div>
+                            ) : (
+                                form && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                                                Primary Skill
+                                            </label>
+                                            <select
+                                                value={form.categoryId}
+                                                onChange={(e) => updateField("categoryId", e.target.value)}
+                                                className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)] bg-white"
+                                            >
+                                                <option value="">Select a skill</option>
+                                                {categories.map((c) => (
+                                                    <option key={c.id} value={c.id}>
+                                                        {c.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <EditInput
+                                            label="Experience (years)"
+                                            type="number"
+                                            value={form.yearsExperience}
+                                            onChange={(v) => updateField("yearsExperience", v)}
+                                        />
+                                    </div>
+                                )
+                            )}
+                        </div>
+
+                        {/* Verification / Documents */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="text-lg font-bold text-gray-900 mb-4">Verification / Documents</h2>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                 {documentCards.map((doc) => (
                                     <div
                                         key={doc.label}
                                         className="border border-gray-100 rounded-xl overflow-hidden"
                                     >
-                                        <div className="h-48 bg-gray-50 flex items-center justify-center">
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                doc.url && setLightbox({ url: doc.url, label: doc.label })
+                                            }
+                                            disabled={!doc.url}
+                                            className="h-40 w-full bg-gray-50 flex items-center justify-center disabled:cursor-default"
+                                        >
                                             {doc.url ? (
                                                 // eslint-disable-next-line @next/next/no-img-element
                                                 <img
                                                     src={doc.url}
                                                     alt={doc.label}
                                                     className="w-full h-full object-cover"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = "none";
+                                                    }}
                                                 />
                                             ) : (
                                                 <div className="flex flex-col items-center text-gray-400">
@@ -426,8 +706,8 @@ const AdminUstaadDetailPage = () => {
                                                     <span className="text-sm">Missing</span>
                                                 </div>
                                             )}
-                                        </div>
-                                        <div className="p-3 flex items-center justify-between">
+                                        </button>
+                                        <div className="p-3 flex items-center justify-between gap-2">
                                             <span className="text-sm font-semibold text-gray-700">
                                                 {doc.label}
                                             </span>
@@ -436,7 +716,8 @@ const AdminUstaadDetailPage = () => {
                                                     href={doc.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--brand)] hover:text-[var(--brand-dark)]"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--brand)] hover:text-[var(--brand-dark)] shrink-0"
                                                 >
                                                     Open <ExternalLink className="w-3 h-3" />
                                                 </a>
@@ -444,6 +725,20 @@ const AdminUstaadDetailPage = () => {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Account Information */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="text-lg font-bold text-gray-900 mb-4">Account Information</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+                                <InfoField label="Worker Status" badge value={worker.status} />
+                                <InfoField label="Approval Status" badge value={worker.onboardingStatus} />
+                                <InfoField label="Verification Status" badge value={worker.verificationStatus} />
+                                <InfoField label="Registration Date" value={formatDate(worker.createdAt)} />
+                                <InfoField label="Last Updated" value={formatDate(worker.updatedAt)} />
+                                <InfoField label="Face Match Status" badge value={worker.faceMatchStatus} />
+                                <InfoField label="Training Status" badge value={worker.trainingStatus} />
                             </div>
                         </div>
 
@@ -609,7 +904,66 @@ const AdminUstaadDetailPage = () => {
                     </div>
                 </div>
             )}
-        </main>
+
+            {/* Worker Status confirmation modal */}
+            {statusModalTarget && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                        <div className="flex items-center gap-2">
+                            {statusModalTarget === "SUSPENDED" && (
+                                <ShieldAlert className="w-5 h-5 text-red-600" />
+                            )}
+                            <h3 className="text-lg font-bold text-gray-900">
+                                {statusModalTarget === "SUSPENDED"
+                                    ? "Suspend Ustaad?"
+                                    : `Change status to ${statusModalTarget}?`}
+                            </h3>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-2">
+                            {statusModalTarget === "SUSPENDED"
+                                ? "This Ustaad will not be able to access the Worker app while suspended."
+                                : `This Ustaad's worker status will be set to ${statusModalTarget}.`}
+                        </p>
+
+                        <div className="mt-5 flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    setStatusModalTarget(null);
+                                    setPendingStatus(worker?.status ?? "");
+                                }}
+                                disabled={statusSaving}
+                                className="px-4 py-2 rounded-lg font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmStatusChange}
+                                disabled={statusSaving}
+                                className={`px-4 py-2 rounded-lg font-semibold text-white disabled:opacity-50 ${
+                                    statusModalTarget === "SUSPENDED"
+                                        ? "bg-red-600 hover:bg-red-700"
+                                        : "bg-[var(--brand)] hover:bg-[var(--brand-dark)]"
+                                }`}
+                            >
+                                {statusSaving
+                                    ? "Saving..."
+                                    : statusModalTarget === "SUSPENDED"
+                                    ? "Confirm Suspension"
+                                    : "Confirm"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {lightbox && (
+                <ImageLightbox
+                    url={lightbox.url}
+                    label={lightbox.label}
+                    onClose={() => setLightbox(null)}
+                />
+            )}
+        </div>
     );
 };
 
@@ -625,16 +979,41 @@ const InfoField = ({
     <div>
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{label}</p>
         {badge ? (
-            <span
-                className={`inline-flex mt-1 items-center px-3 py-1 rounded-full text-xs font-bold ${statusBadgeClasses(
-                    value ? String(value) : null
-                )}`}
-            >
-                {value || "—"}
-            </span>
+            <div className="mt-1">
+                <StatusBadge value={value ? String(value) : null} />
+            </div>
         ) : (
             <p className="text-gray-900 font-medium mt-1">{value ?? "—"}</p>
         )}
+    </div>
+);
+
+const EditInput = ({
+    label,
+    value,
+    onChange,
+    type = "text",
+    placeholder,
+    className = "",
+}: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    type?: string;
+    placeholder?: string;
+    className?: string;
+}) => (
+    <div className={className}>
+        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+            {label}
+        </label>
+        <input
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand)]"
+        />
     </div>
 );
 

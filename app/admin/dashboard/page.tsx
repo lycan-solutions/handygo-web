@@ -1,17 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Users,
-  CheckCircle,
-  Clock,
-  LayoutDashboard,
-  LogOut,
-  AlertCircle,
-} from "lucide-react";
+import { Users, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { adminFetch, clearAdminSession, type AdminStats } from "@/lib/api/admin";
+import { adminFetch, type AdminStats } from "@/lib/api/admin";
 
 const AdminDashboardPage = () => {
   const router = useRouter();
@@ -19,11 +12,6 @@ const AdminDashboardPage = () => {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const handleLogout = () => {
-    clearAdminSession();
-    router.push("/auth/login");
-  };
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -59,32 +47,17 @@ const AdminDashboardPage = () => {
   }, []);
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-[var(--brand)] mb-2">
-              <LayoutDashboard className="w-6 h-6" />
-              <p className="font-semibold">Handygo Admin</p>
-            </div>
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            Admin Dashboard
+          </h1>
 
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Admin Dashboard
-            </h1>
-
-            <p className="text-gray-600 mt-2">
-              Manage Ustaads, bookings, users and platform operations.
-            </p>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="inline-flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:text-red-600 hover:border-red-200 px-4 py-3 rounded-lg font-semibold shadow-sm"
-          >
-            <LogOut className="w-5 h-5" />
-            Logout
-          </button>
+          <p className="text-gray-600 mt-2">
+            Manage Ustaads, bookings, users and platform operations.
+          </p>
         </div>
 
         {/* Error */}
@@ -172,7 +145,7 @@ const AdminDashboardPage = () => {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 };
 

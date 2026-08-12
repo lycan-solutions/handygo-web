@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-
+import Qr from "../components/handygo/AppQrCard";
 export const metadata: Metadata = {
   title: "Handygo — On-Demand Home Repair & Service Booking",
   description:
@@ -512,7 +512,7 @@ export default function HomePage() {
                       <p className="text-xs font-semibold text-zinc-700">Job completed ✓</p>
                     </div>
                     <div className="flex gap-1 pt-1">
-                      {[1,2,3,4,5].map((s) => (
+                      {[1, 2, 3, 4, 5].map((s) => (
                         <svg key={s} viewBox="0 0 12 12" fill="#DB6234" className="w-3.5 h-3.5">
                           <polygon points="6 1 7.5 4.5 11 5 8.5 7.5 9 11 6 9.5 3 11 3.5 7.5 1 5 4.5 4.5 6 1" />
                         </svg>
@@ -563,7 +563,7 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
+      <Qr />
       <Footer />
     </>
   );
