@@ -157,6 +157,11 @@ const AdminUstaadDetailPage = () => {
     }, [router, workerId]);
 
     const handleApprove = async () => {
+        // Defense in depth: the button is already disabled once approved, but
+        // guard the handler itself so a stray call can never re-fire the
+        // approval (and its worker-facing notification) on an already-
+        // APPROVED profile.
+        if (worker?.onboardingStatus === "APPROVED") return;
         if (!confirm("Approve this Ustaad? They will be able to receive jobs.")) return;
 
         setActionLoading("approve");
@@ -393,6 +398,8 @@ const AdminUstaadDetailPage = () => {
         : [];
 
     const statusChanged = worker ? pendingStatus !== worker.status : false;
+    const alreadyApproved = worker?.onboardingStatus === "APPROVED";
+    const alreadySuspended = worker?.status === "SUSPENDED";
 
     return (
         <div className="p-4 md:p-8">
@@ -514,6 +521,21 @@ const AdminUstaadDetailPage = () => {
                                                 Save
                                             </button>
                                         )}
+                                        {/* Independent quick action — governs WorkerStatus only, never
+                                            the onboarding Approval state above. */}
+                                        <button
+                                            onClick={() => setStatusModalTarget("SUSPENDED")}
+                                            disabled={statusSaving || alreadySuspended}
+                                            title={
+                                                alreadySuspended
+                                                    ? "This Ustaad is already suspended."
+                                                    : undefined
+                                            }
+                                            className="inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-100 text-white px-3 py-2 rounded-lg text-sm font-semibold"
+                                        >
+                                            <ShieldAlert className="w-4 h-4" />
+                                            {alreadySuspended ? "Suspended" : "Suspend"}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -820,11 +842,16 @@ const AdminUstaadDetailPage = () => {
                             <div className="flex flex-col sm:flex-row gap-3">
                                 <button
                                     onClick={handleApprove}
-                                    disabled={actionLoading !== ""}
-                                    className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-5 py-3 rounded-lg font-semibold"
+                                    disabled={actionLoading !== "" || alreadyApproved}
+                                    title={alreadyApproved ? "This Ustaad is already approved." : undefined}
+                                    className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-100 text-white px-5 py-3 rounded-lg font-semibold"
                                 >
                                     <CheckCircle2 className="w-5 h-5" />
-                                    {actionLoading === "approve" ? "Approving..." : "Approve"}
+                                    {actionLoading === "approve"
+                                        ? "Approving..."
+                                        : alreadyApproved
+                                        ? "Already Approved"
+                                        : "Approve"}
                                 </button>
 
                                 <button

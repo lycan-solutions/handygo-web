@@ -228,6 +228,8 @@ export async function updateWorkerSkills(
 
 export const WORKER_STATUSES = ["ACTIVE", "INACTIVE", "SUSPENDED"] as const;
 
+export const VERIFICATION_STATUSES = ["PENDING", "VERIFIED", "REJECTED"] as const;
+
 export type WorkerAgreement = {
   id: string;
   agreementType: string;
@@ -260,3 +262,183 @@ export const TRAINING_STATUSES = [
   "COMPLETED",
   "NEEDS_RETRAINING",
 ] as const;
+
+// ── OTP Diagnostics ─────────────────────────────────────────────────────────
+
+/** Mirrors the actual Prisma AuthOtpPurpose enum — do not invent values. */
+export const OTP_PURPOSES = [
+  "CLIENT_LOGIN_REGISTER",
+  "WORKER_REGISTER",
+  "WORKER_LOGIN",
+] as const;
+
+export const OTP_STATUSES = ["ACTIVE", "CONSUMED", "EXPIRED"] as const;
+
+export type OtpListItem = {
+  id: string;
+  phone: string;
+  purpose: (typeof OTP_PURPOSES)[number];
+  createdAt: string;
+  expiresAt: string;
+  attempts: number;
+  consumedAt: string | null;
+  status: (typeof OTP_STATUSES)[number];
+  /** Provider ACCEPTED the message — never a handset delivery guarantee. */
+  smsStatus: "DISPATCHED" | "NOT_SENT";
+  requestIp: string | null;
+  revealable: boolean;
+};
+
+export type PaginatedOtp = {
+  items: OtpListItem[];
+  meta: PaginationMeta;
+};
+
+export type ListOtpParams = {
+  search?: string;
+  purpose?: string;
+  status?: string;
+  /** Minutes of history to include. Default 60. */
+  sinceMinutes?: number;
+  page?: number;
+  pageSize?: number;
+};
+
+export async function fetchOtpRecords(params: ListOtpParams): Promise<PaginatedOtp> {
+  const qs = new URLSearchParams();
+  if (params.search?.trim()) qs.set("search", params.search.trim());
+  if (params.purpose) qs.set("purpose", params.purpose);
+  if (params.status) qs.set("status", params.status);
+  qs.set("sinceMinutes", String(params.sinceMinutes ?? 60));
+  qs.set("page", String(params.page ?? 1));
+  qs.set("pageSize", String(params.pageSize ?? 20));
+
+  return adminFetch<PaginatedOtp>(`/admin/otp?${qs.toString()}`);
+}
+
+export type RevealOtpResult = {
+  otp: string;
+  expiresAt: string;
+};
+
+/**
+ * POST /admin/otp/:id/reveal — sensitive + audited server-side. Never call
+ * this speculatively; only in direct response to an explicit admin click.
+ */
+export async function revealOtp(otpId: string): Promise<RevealOtpResult> {
+  return adminFetch<RevealOtpResult>(`/admin/otp/${otpId}/reveal`, {
+    method: "POST",
+  });
+}
+
+// ── Clients ──────────────────────────────────────────────────────────────────
+
+/** Mirrors the actual Prisma AccountStatus enum — do not invent values. */
+export const ACCOUNT_STATUSES = ["ACTIVE", "SUSPENDED"] as const;
+
+export type ClientListItem = {
+  /** ClientProfile.id — used by the detail/profile routes. */
+  id: string;
+  /** User.id — needed for the account-status endpoint. */
+  userId: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  phone: string;
+  phoneVerified: boolean;
+  accountStatus: (typeof ACCOUNT_STATUSES)[number];
+  bookingsCount: number;
+  createdAt: string;
+  lastActivityAt: string;
+};
+
+export type PaginatedClients = {
+  items: ClientListItem[];
+  meta: PaginationMeta;
+};
+
+export type ListClientsParams = {
+  search?: string;
+  accountStatus?: string;
+  phoneVerified?: "VERIFIED" | "NOT_VERIFIED";
+  sort?: "NEWEST" | "OLDEST" | "NAME";
+  page?: number;
+  pageSize?: number;
+};
+
+export async function fetchClients(params: ListClientsParams): Promise<PaginatedClients> {
+  const qs = new URLSearchParams();
+  if (params.search?.trim()) qs.set("search", params.search.trim());
+  if (params.accountStatus) qs.set("accountStatus", params.accountStatus);
+  if (params.phoneVerified) qs.set("phoneVerified", params.phoneVerified);
+  qs.set("sort", params.sort ?? "NEWEST");
+  qs.set("page", String(params.page ?? 1));
+  qs.set("pageSize", String(params.pageSize ?? 20));
+
+  return adminFetch<PaginatedClients>(`/admin/clients?${qs.toString()}`);
+}
+
+export type ClientBookingSummary = {
+  total: number;
+  completed: number;
+  active: number;
+  cancelled: number;
+};
+
+export type ClientRecentBooking = {
+  id: string;
+  categoryName: string;
+  status: string;
+  workerName: string | null;
+  createdAt: string;
+};
+
+export type ClientDetail = {
+  id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  phone: string;
+  phoneVerified: boolean;
+  accountStatus: (typeof ACCOUNT_STATUSES)[number];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  bookingSummary: ClientBookingSummary;
+  recentBookings: ClientRecentBooking[];
+};
+
+export async function fetchClientDetail(clientProfileId: string): Promise<ClientDetail> {
+  return adminFetch<ClientDetail>(`/admin/clients/${clientProfileId}`);
+}
+
+export type UpdateClientProfileFields = Partial<{
+  firstName: string;
+  lastName: string;
+}>;
+
+export async function updateClientProfileFields(
+  clientProfileId: string,
+  data: UpdateClientProfileFields
+): Promise<ClientDetail> {
+  return adminFetch<ClientDetail>(`/admin/clients/${clientProfileId}/profile`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * PATCH /admin/users/:userId/account-status — the existing Client
+ * suspend/reactivate mechanism (reused as-is, not duplicated). Takes
+ * User.id, not the ClientProfile id used elsewhere on this page.
+ */
+export async function updateClientAccountStatus(
+  userId: string,
+  status: string
+): Promise<{ id: string; accountStatus: string; updatedAt: string }> {
+  return adminFetch(`/admin/users/${userId}/account-status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}

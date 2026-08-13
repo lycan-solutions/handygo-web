@@ -1,5 +1,13 @@
 import type { LucideIcon } from "lucide-react";
-import { Home, UserCheck, Users, Building2, LifeBuoy, UserMinus } from "lucide-react";
+import {
+  Home,
+  UserCheck,
+  Users,
+  Building2,
+  LifeBuoy,
+  UserMinus,
+  KeyRound,
+} from "lucide-react";
 
 export type AdminNavItem = {
   label: string;
@@ -14,6 +22,7 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { label: "Clients List", href: "/admin/clients", icon: Building2 },
   { label: "Support", href: "/admin/support", icon: LifeBuoy },
   { label: "Delete User", href: "/admin/delete-user", icon: UserMinus },
+  { label: "OTP Diagnostics", href: "/admin/otp", icon: KeyRound },
 ];
 
 export function isNavItemActive(pathname: string, href: string) {
