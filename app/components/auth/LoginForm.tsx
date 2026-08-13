@@ -25,7 +25,7 @@ const LoginForm = () => {
     }
     setLoading(true)
     try {
-      const response = await fetch('https://handygo-production-jqi9i.ondigitalocean.app/api/v1/auth/login', {
+      const response = await fetch('https://handygo-production-jqi9i.ondigitalocean.app/api/v1/auth/admin/login', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
