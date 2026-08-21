@@ -33,10 +33,12 @@ const AdminSidebar = ({
   };
 
   return (
-    <div className={`flex h-full flex-col bg-white ${isMobile ? "w-72" : "w-full"}`}>
+    <div
+      className={`flex h-full flex-col bg-[var(--surface)] ${isMobile ? "w-72" : "w-full"}`}
+    >
       {/* Brand */}
       <div
-        className={`flex items-center h-16 px-4 border-b border-gray-100 ${
+        className={`flex items-center h-16 px-4 border-b border-[var(--border)] ${
           isCollapsed ? "justify-center" : "justify-between"
         }`}
       >
@@ -46,8 +48,12 @@ const AdminSidebar = ({
           </div>
           {!isCollapsed && (
             <div className="leading-tight min-w-0">
-              <p className="font-bold text-gray-900 truncate">HandyGo</p>
-              <p className="text-xs text-gray-500 truncate">Admin Panel</p>
+              <p className="font-bold text-[var(--foreground)] truncate">
+                HandyGo
+              </p>
+              <p className="text-xs text-[var(--text-secondary)] truncate">
+                Admin Panel
+              </p>
             </div>
           )}
         </div>
@@ -65,7 +71,10 @@ const AdminSidebar = ({
       </div>
 
       {/* Navigation */}
-      <nav aria-label="Admin navigation" className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <nav
+        aria-label="Admin navigation"
+        className="flex-1 overflow-y-auto px-3 py-4 space-y-1"
+      >
         {ADMIN_NAV_ITEMS.map((item) => (
           <AdminNavItem
             key={item.href}

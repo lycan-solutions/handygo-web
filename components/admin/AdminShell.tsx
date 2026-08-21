@@ -27,15 +27,19 @@ const AdminShell = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 md:flex">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] md:flex">
       {/* Desktop sidebar */}
       <aside
-        className={`hidden md:block shrink-0 border-r border-gray-100 transition-[width] duration-200 ${
+        className={`hidden md:block shrink-0 border-r border-[var(--border)] transition-[width] duration-200 ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
         <div className="sticky top-0 h-screen">
-          <AdminSidebar collapsed={collapsed} onToggleCollapse={toggleCollapse} variant="desktop" />
+          <AdminSidebar
+            collapsed={collapsed}
+            onToggleCollapse={toggleCollapse}
+            variant="desktop"
+          />
         </div>
       </aside>
 

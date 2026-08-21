@@ -7,6 +7,9 @@ import {
   LifeBuoy,
   UserMinus,
   KeyRound,
+  CalendarDays,
+  BriefcaseBusiness,
+  ListTodo,
 } from "lucide-react";
 
 export type AdminNavItem = {
@@ -20,6 +23,13 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { label: "Pending Ustaads", href: "/admin/ustaads", icon: UserCheck },
   { label: "Ustaads List", href: "/admin/ustaads-list", icon: Users },
   { label: "Clients List", href: "/admin/clients", icon: Building2 },
+  { label: "Bookings", href: "/admin/bookings", icon: BriefcaseBusiness },
+  { label: "Cases", href: "/admin/cases", icon: ListTodo },
+  {
+    label: "Nightly Commission",
+    href: "/admin/settlements/nightly",
+    icon: CalendarDays,
+  },
   { label: "Support", href: "/admin/support", icon: LifeBuoy },
   { label: "Delete User", href: "/admin/delete-user", icon: UserMinus },
   { label: "OTP Diagnostics", href: "/admin/otp", icon: KeyRound },

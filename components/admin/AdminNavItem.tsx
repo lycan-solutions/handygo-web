@@ -29,13 +29,15 @@ const AdminNavItem = ({
       aria-current={active ? "page" : undefined}
       className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)] ${
         active
-          ? "bg-orange-50 text-[var(--brand)]"
-          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+          ? "bg-[var(--brand-light)] text-[var(--brand)]"
+          : "text-[var(--text-secondary)] hover:bg-[var(--surface-subtle)] hover:text-[var(--foreground)]"
       } ${collapsed ? "justify-center" : ""}`}
     >
       <Icon
         className={`w-5 h-5 shrink-0 ${
-          active ? "text-[var(--brand)]" : "text-gray-400 group-hover:text-gray-600"
+          active
+            ? "text-[var(--brand)]"
+            : "text-[var(--text-secondary)] group-hover:text-[var(--foreground)]"
         }`}
       />
       {!collapsed && <span className="truncate">{label}</span>}
