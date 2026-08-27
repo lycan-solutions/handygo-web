@@ -165,7 +165,11 @@ function SupportContent() {
                 <option key={v}>{v}</option>
               ))}
             </select>
+            {/* Uncontrolled so typing does not rewrite the URL on every
+                keystroke; keyed on `search` so "Clear filters" — which only
+                changes the URL — still empties the box. */}
             <input
+              key={search}
               defaultValue={search}
               onKeyDown={(e) => {
                 if (e.key === "Enter")

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { Hand, RotateCcw, UserCheck, UserMinus } from "lucide-react";
@@ -248,13 +249,16 @@ function ComplaintDetailContent() {
                           }
                         />
                       </div>
+                      {/* `bookingId` opens that booking's detail panel
+                          directly (app/admin/bookings/page.tsx:66); `search`
+                          would only pre-fill the list. */}
                       {item.booking && (
-                        <a
-                          href={`/admin/bookings?search=${item.booking.id}`}
+                        <Link
+                          href={`/admin/bookings?bookingId=${item.booking.id}`}
                           className={`mt-4 ${secondaryButtonClass}`}
                         >
                           Open this booking
-                        </a>
+                        </Link>
                       )}
                     </section>
 
