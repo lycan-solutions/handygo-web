@@ -1,15 +1,8 @@
 import type { Metadata } from "next";
-import {
-  Banknote,
-  ClipboardList,
-  MapPin,
-  MessageSquare,
-  ShieldCheck,
-  Star,
-  Wrench,
-} from "lucide-react";
+import { MessageSquare, ShieldCheck, Wrench } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import StepTour, { type TourStep } from "./StepTour";
 
 export const metadata: Metadata = {
   title: "How it works — Handygo",
@@ -17,27 +10,55 @@ export const metadata: Metadata = {
     "Post a job, agree the price, track your Ustaad, pay cash when the work is done. How booking a home repair on Handygo actually works.",
 };
 
-/** Mirrors the real booking lifecycle in the app, not an idealised version. */
-const STEPS = [
+/**
+ * The four steps, each shown as the actual app screen it happens on. The
+ * images are exports from the Handygo prototype — the same screens the app is
+ * built from — so the page teaches the real flow rather than describing it.
+ *
+ * Example rates inside the screenshots are blurred on purpose: the app shows
+ * the real amount before you confirm, and a number printed on a marketing page
+ * goes stale the day it changes.
+ */
+const STEPS: readonly TourStep[] = [
   {
-    icon: ClipboardList,
+    image: "/images/how-it-works/1-post.jpg",
+    alt: "The Handygo request screen: what needs doing, who supplies the part, a photo and a voice note.",
     title: "Post the job",
-    body: "Pick the service, say what the problem is, add photos or a voice note if it is easier than typing. Set the address and when you want it.",
+    lines: [
+      "Pick the service and say what the problem is.",
+      "Add photos or a voice note instead of typing it out.",
+      "Set the address and the time that suits you.",
+    ],
   },
   {
-    icon: Banknote,
+    image: "/images/how-it-works/2-price.jpg",
+    alt: "The offers screen: three CNIC-verified Ustaads with their rate, what is included and when they can come.",
     title: "Agree the price",
-    body: "Depending on the job you either see a fixed price, receive rates from nearby Ustaads and pick one, or book an inspection so an Ustaad can look before quoting. Nothing starts until you accept an amount.",
+    lines: [
+      "Either the price is fixed, or nearby Ustaads send you their rates.",
+      "Each offer shows what is included, with parts and labour separately.",
+      "Nothing starts until you accept an amount.",
+    ],
   },
   {
-    icon: MapPin,
+    image: "/images/how-it-works/3-track.jpg",
+    alt: "The booking screen: a live map, the Ustaad on the way, and the stage-by-stage timeline.",
     title: "Track them to your door",
-    body: "Once an Ustaad accepts, you can see where they are on the map and chat with them in the app. No guessing whether anyone is actually coming.",
+    lines: [
+      "Watch your Ustaad on the map once they set off.",
+      "Call or chat from inside the app if you need to.",
+      "Every stage updates itself — on the way, arrived, started, done.",
+    ],
   },
   {
-    icon: Star,
+    image: "/images/how-it-works/4-pay.jpg",
+    alt: "The completed booking: the cash amount, a rating prompt and a link to report a problem.",
     title: "Pay and rate",
-    body: "Pay in cash when the work is finished, then rate the Ustaad. Ratings are what keep good Ustaads visible and push bad ones out.",
+    lines: [
+      "Pay in cash when the work is finished — the rate you approved.",
+      "Rate the Ustaad; ratings are what keep the good ones visible.",
+      "If something is wrong, report it in the app and we have it redone.",
+    ],
   },
 ];
 
@@ -87,34 +108,13 @@ export default function HowItWorksPage() {
           </div>
         </div>
 
-        <section className="max-w-4xl mx-auto px-5 sm:px-8 py-14">
-          <ol className="space-y-4">
-            {STEPS.map(({ icon: Icon, title, body }, i) => (
-              <li
-                key={title}
-                className="rounded-2xl border border-zinc-200 bg-white p-6 flex gap-5"
-              >
-                <div className="shrink-0">
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center"
-                    style={{ background: "var(--brand-light)" }}
-                  >
-                    <Icon className="w-5 h-5" style={{ color: "var(--brand)" }} />
-                  </div>
-                </div>
-                <div>
-                  <p
-                    className="text-xs font-bold tracking-widest uppercase mb-1"
-                    style={{ color: "var(--brand)" }}
-                  >
-                    Step {i + 1}
-                  </p>
-                  <h2 className="font-bold text-zinc-900 mb-1.5">{title}</h2>
-                  <p className="text-sm text-zinc-600 leading-7">{body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+        <section className="max-w-5xl mx-auto px-5 sm:px-8 py-14">
+          <StepTour steps={STEPS} />
+          <p className="mt-10 text-xs leading-6 text-zinc-500 max-w-2xl">
+            Screens from the Handygo app. The rates inside them are examples and
+            are blurred on purpose — the app shows you the real amount before
+            you confirm anything.
+          </p>
         </section>
 
         <section className="border-y border-zinc-100 bg-white">
