@@ -45,8 +45,8 @@ const STEPS = [
 const PROMISES = [
   {
     icon: ShieldCheck,
-    title: "Every Ustaad is CNIC-verified",
-    body: "We check identity documents before anyone can take a job, and verify in person. A stranger is coming into your home — that should not be a leap of faith.",
+    title: "Every Ustaad is verified and trained by us",
+    body: "Someone on our team compares their CNIC to a live photo, meets them face to face, and puts them through a full day of training before they take a single job. A stranger is coming into your home — that should not be a leap of faith.",
   },
   {
     icon: Wrench,

@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Banknote,
-  CalendarCheck,
   CheckCircle2,
+  GraduationCap,
   IdCard,
   MapPin,
-  Smartphone,
+  ScanFace,
   Star,
+  UserCheck,
+  XCircle,
 } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -15,35 +17,39 @@ import Footer from "../components/Footer";
 export const metadata: Metadata = {
   title: "Become an Ustaad — Handygo",
   description:
-    "Get repair jobs in DHA and Clifton, Karachi. Register on the Handygo app, get verified, and start receiving work. Approval is usually same day.",
+    "Handygo verifies every Ustaad in person and trains them for a full day before they take a single job. If you have the skill, this is how you join.",
 };
 
-const NEED = [
-  { icon: IdCard, text: "Your original CNIC" },
-  { icon: Smartphone, text: "A phone number you use every day" },
-  { icon: MapPin, text: "You work in DHA or Clifton" },
+/**
+ * The point of this page is that the bar is real. Every claim below maps to
+ * something the system actually tracks — WorkerOnboardingStatus has a REJECTED
+ * state, FaceMatchStatus is set by a human admin comparing CNIC to a live
+ * selfie, and TrainingStatus has NEEDS_RETRAINING. Nothing here is decoration.
+ */
+const GATES = [
   {
-    icon: CheckCircle2,
-    text: "Real skill in AC, plumbing, electrical, appliance repair or carpentry",
-  },
-];
-
-const STEPS = [
-  {
-    title: "Register in the app",
-    body: "Download Handygo, choose “I am an Ustaad”, and sign up with your phone number.",
+    icon: IdCard,
+    step: "Documents",
+    title: "CNIC, front and back, plus a live selfie",
+    body: "Not a form you fill in — actual documents, uploaded from your own phone.",
   },
   {
-    title: "Send your documents",
-    body: "CNIC front and back, and a selfie. This is how we know the person taking the job is the person in the picture.",
+    icon: ScanFace,
+    step: "Identity",
+    title: "A person checks the photo against your face",
+    body: "No software does this. Someone on our team compares your CNIC to your selfie and decides. If it does not match, you do not proceed.",
   },
   {
-    title: "Meet us in person",
-    body: "We verify you face to face before you get work. Approval is usually the same day, subject to that meeting.",
+    icon: UserCheck,
+    step: "In person",
+    title: "We meet you before you meet a customer",
+    body: "You come and sit with us. We ask about your work, where you have worked, and what you can actually do. Some people are turned away here.",
   },
   {
-    title: "Start taking jobs",
-    body: "Once approved, jobs near you appear in the app. Accept the ones you want.",
+    icon: GraduationCap,
+    step: "Training",
+    title: "A full day, taught by us",
+    body: "Before your first job you spend a day with our team. Skill is not enough on its own — how you speak to a customer in their home, how you quote, how you leave the place, all of it matters.",
   },
 ];
 
@@ -51,17 +57,17 @@ const WHY = [
   {
     icon: Banknote,
     title: "Cash, on the spot",
-    body: "The customer pays you in cash when the work is done. No waiting weeks to be paid.",
-  },
-  {
-    icon: CalendarCheck,
-    title: "You choose the work",
-    body: "Nobody assigns you a job. You see what is near you and take what suits your day.",
+    body: "The customer pays you when the work is done. No waiting weeks to be paid.",
   },
   {
     icon: Star,
     title: "Good work gets seen",
-    body: "Customers rate you after every job, and a strong rating brings more work. Your reputation is yours.",
+    body: "Customers rate you after every job, and a strong rating brings more work. Your reputation is yours to build.",
+  },
+  {
+    icon: MapPin,
+    title: "Work close to home",
+    body: "Jobs in DHA and Clifton, near where you already are. Less time on the road, more jobs in a day.",
   },
 ];
 
@@ -71,10 +77,7 @@ export default function BecomeAnUstaadPage() {
       <Header />
 
       <main className="flex-1">
-        <div
-          style={{ background: "var(--brand)" }}
-          className="py-14 px-5 sm:px-8"
-        >
+        <div style={{ background: "var(--brand)" }} className="py-16 px-5 sm:px-8">
           <div className="max-w-4xl mx-auto">
             <span
               className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
@@ -82,78 +85,126 @@ export default function BecomeAnUstaadPage() {
             >
               For Ustaads
             </span>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
-              Work near you. Paid the same day.
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 max-w-2xl">
+              We do not hand out jobs. We choose who gets them.
             </h1>
             <p
               className="text-base leading-7 max-w-2xl"
               style={{ color: "var(--brand-light)" }}
             >
-              If you fix ACs, pipes, wiring, appliances or furniture in DHA or
-              Clifton, Handygo brings the customers to you. You keep choosing
-              which jobs to take, and you get paid in cash when the work is
-              finished.
+              Anyone can call themselves an Ustaad. On Handygo you are verified
+              in person, trained for a full day by our own team, and only then
+              sent into somebody&apos;s home. That is the whole point of the
+              platform — and it is why customers trust the Ustaads on it.
             </p>
           </div>
         </div>
 
         <section className="max-w-4xl mx-auto px-5 sm:px-8 py-14">
           <h2 className="text-2xl font-bold text-zinc-900 mb-2">
-            What you need
+            Four gates before your first job
           </h2>
-          <p className="text-zinc-600 text-sm leading-7 mb-8 max-w-2xl">
-            No shop, no company, no paperwork beyond this.
+          <p className="text-zinc-600 text-sm leading-7 mb-9 max-w-2xl">
+            Each one is a real check, and each one turns people away. If you are
+            good at your work, none of it should worry you.
           </p>
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {NEED.map(({ icon: Icon, text }) => (
+
+          <ol className="space-y-4">
+            {GATES.map(({ icon: Icon, step, title, body }, i) => (
               <li
-                key={text}
-                className="flex items-center gap-3.5 rounded-2xl border border-zinc-200 bg-white p-5"
+                key={title}
+                className="rounded-2xl border border-zinc-200 bg-white p-6 flex gap-5"
               >
-                <Icon
-                  className="w-5 h-5 shrink-0"
-                  style={{ color: "var(--brand)" }}
-                />
-                <span className="text-sm text-zinc-700 leading-6">{text}</span>
+                <div className="shrink-0">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center"
+                    style={{ background: "var(--brand-light)" }}
+                  >
+                    <Icon className="w-5 h-5" style={{ color: "var(--brand)" }} />
+                  </div>
+                </div>
+                <div>
+                  <p
+                    className="text-xs font-bold tracking-widest uppercase mb-1"
+                    style={{ color: "var(--brand)" }}
+                  >
+                    {i + 1} · {step}
+                  </p>
+                  <h3 className="font-bold text-zinc-900 mb-1.5">{title}</h3>
+                  <p className="text-sm text-zinc-600 leading-7">{body}</p>
+                </div>
               </li>
             ))}
-          </ul>
+          </ol>
+
+          {/* Said out loud rather than implied. A page that only lists benefits
+              attracts everyone; this page is meant to attract the right people
+              and deter the rest. */}
+          <div
+            className="mt-6 rounded-2xl border p-6 flex gap-4"
+            style={{ borderColor: "var(--urgent)", background: "var(--urgent-soft)" }}
+          >
+            <XCircle
+              className="w-5 h-5 shrink-0 mt-0.5"
+              style={{ color: "var(--urgent)" }}
+            />
+            <div>
+              <h3 className="font-bold mb-1" style={{ color: "var(--urgent)" }}>
+                Applications do get rejected
+              </h3>
+              <p className="text-sm text-zinc-700 leading-7">
+                If the identity check fails, if the work is not up to standard,
+                or if the training day shows you are not ready, you will not be
+                approved. Some Ustaads are asked to train again before they
+                start. We would rather lose an Ustaad than send the wrong person
+                into a customer&apos;s home.
+              </p>
+            </div>
+          </div>
         </section>
 
         <section className="border-y border-zinc-100 bg-white">
           <div className="max-w-4xl mx-auto px-5 sm:px-8 py-14">
-            <h2 className="text-2xl font-bold text-zinc-900 mb-8">
-              Joining takes four steps
+            <h2 className="text-2xl font-bold text-zinc-900 mb-2">
+              Who we are looking for
             </h2>
-            <ol className="space-y-4">
-              {STEPS.map(({ title, body }, i) => (
-                <li key={title} className="flex gap-5">
-                  <span
-                    className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-                    style={{
-                      background: "var(--brand-light)",
-                      color: "var(--brand)",
-                    }}
-                  >
-                    {i + 1}
-                  </span>
-                  <div className="pt-1.5">
-                    <h3 className="font-bold text-zinc-900 mb-1">{title}</h3>
-                    <p className="text-sm text-zinc-600 leading-7">{body}</p>
-                  </div>
+            <p className="text-zinc-600 text-sm leading-7 mb-8 max-w-2xl">
+              Trade skill is the first requirement, not the only one.
+            </p>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {[
+                "Real, working experience in AC, plumbing, electrical, appliance repair or carpentry",
+                "A clean original CNIC in your own name",
+                "You live or work in DHA or Clifton",
+                "You can give a full day to training before your first job",
+                "A smartphone you use every day",
+                "You are willing to be rated by every customer you serve",
+              ].map((t) => (
+                <li
+                  key={t}
+                  className="flex items-start gap-3 rounded-2xl border border-zinc-200 p-5"
+                >
+                  <CheckCircle2
+                    className="w-5 h-5 shrink-0 mt-0.5"
+                    style={{ color: "var(--brand)" }}
+                  />
+                  <span className="text-sm text-zinc-700 leading-6">{t}</span>
                 </li>
               ))}
-            </ol>
+            </ul>
           </div>
         </section>
 
         <section className="max-w-4xl mx-auto px-5 sm:px-8 py-14">
           <h2 className="text-2xl font-bold text-zinc-900 mb-8">
-            Why Ustaads stay
+            What you get once you are in
           </h2>
           <div className="grid gap-4 sm:grid-cols-3">
             {WHY.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="rounded-2xl border border-zinc-200 bg-white p-6">
+              <div
+                key={title}
+                className="rounded-2xl border border-zinc-200 bg-white p-6"
+              >
                 <Icon className="w-5 h-5 mb-4" style={{ color: "var(--brand)" }} />
                 <h3 className="font-bold text-zinc-900 mb-1.5">{title}</h3>
                 <p className="text-sm text-zinc-600 leading-6">{body}</p>
@@ -166,22 +217,22 @@ export default function BecomeAnUstaadPage() {
             style={{ background: "var(--surface-subtle)" }}
           >
             <h2 className="text-xl font-bold text-zinc-900 mb-2">
-              The app is almost here
+              Think you meet the bar?
             </h2>
             <p className="text-zinc-600 text-sm leading-7 max-w-lg mx-auto mb-7">
-              Handygo is launching on Google Play shortly. If you want to be one
-              of the first Ustaads on the platform, write to us and we will get
-              you registered as soon as it is live.
+              The app launches on Google Play shortly. Write to us with your
+              trade and how long you have been doing it, and we will call you to
+              arrange the interview and your training day.
             </p>
             <a
-              href="mailto:support@handygo.ai?subject=I%20want%20to%20join%20as%20an%20Ustaad"
+              href="mailto:support@handygo.ai?subject=Ustaad%20application&body=Trade%3A%20%0AYears%20of%20experience%3A%20%0AArea%3A%20"
               className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white"
               style={{ background: "var(--brand)" }}
             >
-              Write to us
+              Apply to join
             </a>
             <p className="text-xs text-zinc-500 mt-5">
-              Already a customer?{" "}
+              Looking to book a job instead?{" "}
               <Link href="/how-it-works" style={{ color: "var(--brand)" }}>
                 See how booking works
               </Link>

@@ -114,8 +114,8 @@ export default function ServicesPage() {
             <p className="text-zinc-600 text-base leading-7 max-w-2xl">
               We would rather do a few things well than list everything and
               deliver half of it. These five are live today in DHA and Clifton,
-              Karachi — every Ustaad CNIC-verified, every price agreed before
-              the work starts.
+              Karachi — every Ustaad verified in person and trained by us, every
+              price agreed before the work starts.
             </p>
           </div>
         </div>
