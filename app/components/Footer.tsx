@@ -42,9 +42,6 @@ export default function Footer() {
                 <Link href="/how-it-works" className="hover:text-white transition-colors">How it works</Link>
               </li>
               <li>
-                <Link href="/become-an-ustaad" className="hover:text-white transition-colors">Become an Ustaad</Link>
-              </li>
-              <li>
                 <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
               </li>
               <li>

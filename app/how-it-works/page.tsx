@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   Banknote,
   ClipboardList,
@@ -138,23 +137,26 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
+        {/* The Ustaad-facing page is down while the verification and training
+            process is settled, so this sends applicants to email rather than
+            to a link that no longer exists. */}
         <section className="max-w-4xl mx-auto px-5 sm:px-8 py-14">
           <div className="rounded-2xl border border-zinc-200 bg-white p-8 sm:p-10 text-center">
             <h2 className="text-2xl font-bold text-zinc-900 mb-2">
               Are you an Ustaad?
             </h2>
             <p className="text-zinc-600 text-sm leading-7 max-w-lg mx-auto mb-7">
-              If you do AC, plumbing, electrical, appliance or carpentry work in
-              DHA or Clifton, you can get jobs through Handygo. Approval is
-              usually same day.
+              We verify every Ustaad in person and train them ourselves before
+              they take a job. If you do AC, plumbing, electrical, appliance or
+              carpentry work in DHA or Clifton, write to us.
             </p>
-            <Link
-              href="/become-an-ustaad"
+            <a
+              href="mailto:support@handygo.ai?subject=Ustaad%20application"
               className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold text-white"
               style={{ background: "var(--brand)" }}
             >
-              Join as an Ustaad
-            </Link>
+              Write to us
+            </a>
           </div>
         </section>
       </main>
