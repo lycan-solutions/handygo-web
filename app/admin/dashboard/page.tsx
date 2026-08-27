@@ -1,152 +1,237 @@
 "use client";
 
 import Link from "next/link";
-import { Users, CheckCircle, Clock, AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { adminFetch, type AdminStats } from "@/lib/api/admin";
+import { useCallback, useEffect, useState } from "react";
+import { RotateCcw } from "lucide-react";
+import {
+  fetchDashboardCounts,
+  startOfToday,
+  type DashboardCounts,
+} from "@/lib/api/admin-dashboard";
+import {
+  AccessGate,
+  ErrorBanner,
+  PageHeader,
+  panelClass,
+  secondaryButtonClass,
+  useAdminAccess,
+} from "@/components/admin/operations/OperationsUi";
 
-const AdminDashboardPage = () => {
-  const router = useRouter();
+/**
+ * Every card is a link into the list it counts, carrying the same filter.
+ * A number an admin cannot act on is decoration; "12 open tickets" is only
+ * useful if clicking it shows those twelve.
+ */
+type Card = {
+  label: string;
+  value: number | null;
+  href: string;
+  hint?: string;
+  /** Turns urgent once there is actually something waiting on a person. */
+  urgentWhenNonZero?: boolean;
+};
 
-  const [stats, setStats] = useState<AdminStats | null>(null);
+export default function AdminDashboardPage() {
+  const access = useAdminAccess();
+  const [counts, setCounts] = useState<DashboardCounts | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  /** Empty until the first load, so "today" is recomputed on every Refresh
+      instead of freezing on a tab left open past midnight. */
+  const [from, setFrom] = useState("");
 
-  const fetchDashboardData = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
-
-    const token = localStorage.getItem("handygo_access_token");
-    const role = localStorage.getItem("handygo_role");
-
-    if (!token) {
-      router.push("/auth/login");
-      return;
-    }
-
-    if (role !== "ADMIN") {
-      setError("You are not authorized to access admin dashboard.");
-      setLoading(false);
-      return;
-    }
-
+    const today = startOfToday();
+    setFrom(today);
     try {
-      const data = await adminFetch<AdminStats>("/admin/stats");
-      setStats(data);
+      setCounts(await fetchDashboardCounts(today));
     } catch (err) {
-      console.log("Dashboard fetch error:", err);
-      setError(err instanceof Error ? err.message : "Server error. Please try again.");
+      setError(err instanceof Error ? err.message : "Failed to load counts.");
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
   }, []);
 
+  useEffect(() => {
+    if (access.allowed) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void load();
+    }
+  }, [access.allowed, load]);
+
+  const c = counts;
+  const encodedFrom = encodeURIComponent(from);
+
+  const attention: Card[] = [
+    {
+      label: "Asked for a human",
+      value: c?.humanRequested ?? null,
+      href: "/admin/support?humanRequested=true",
+      hint: "A customer is waiting to speak to a person",
+      urgentWhenNonZero: true,
+    },
+    {
+      label: "Open tickets",
+      value: c?.openTickets ?? null,
+      href: "/admin/support?status=OPEN",
+      hint: "Complaints nobody has picked up",
+    },
+    {
+      label: "Open cases",
+      value: c?.openCases ?? null,
+      href: "/admin/cases?status=OPEN",
+      hint: "Settlement exceptions",
+    },
+    {
+      label: "Ustaads awaiting approval",
+      value: c?.pendingUstaads ?? null,
+      href: "/admin/ustaads",
+      hint: "Submitted for review",
+    },
+  ];
+
+  const bookings: Card[] = [
+    {
+      label: "Booked today",
+      value: c?.bookingsToday ?? null,
+      href: from ? `/admin/bookings?from=${encodedFrom}` : "/admin/bookings",
+      hint: "Created since midnight",
+    },
+    {
+      label: "Waiting for an Ustaad",
+      value: c?.bookingsPending ?? null,
+      href: "/admin/bookings?status=PENDING",
+      hint: "Nobody has accepted yet",
+    },
+    {
+      label: "Work in progress",
+      value: c?.bookingsInProgress ?? null,
+      href: "/admin/bookings?status=IN_PROGRESS",
+      hint: "An Ustaad is on the job",
+    },
+    {
+      label: "Awaiting confirmation",
+      value: c?.bookingsAwaitingConfirmation ?? null,
+      href: "/admin/bookings?status=AWAITING_CONFIRMATION",
+      hint: "Waiting on the customer",
+    },
+  ];
+
+  const totals: Card[] = [
+    {
+      label: "Bookings, all time",
+      value: c?.bookingsTotal ?? null,
+      href: "/admin/bookings",
+    },
+    {
+      label: "Completed",
+      value: c?.bookingsCompleted ?? null,
+      href: "/admin/bookings?status=COMPLETED",
+    },
+    {
+      label: "Approved Ustaads",
+      value: c?.approvedUstaads ?? null,
+      href: "/admin/ustaads-list",
+    },
+    {
+      label: "Registered users",
+      value: c?.totalUsers ?? null,
+      href: "/admin/clients",
+    },
+  ];
+
   return (
-    <div className="p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Admin Dashboard
-          </h1>
+    <AccessGate {...access}>
+      <div className="p-4 md:p-8">
+        <div className="mx-auto max-w-[1400px]">
+          <PageHeader
+            eyebrow="Overview"
+            title="Dashboard"
+            description="Live counts straight from the lists behind them. Click any number to open it."
+            action={
+              <button
+                onClick={load}
+                disabled={loading}
+                className={secondaryButtonClass}
+              >
+                <RotateCcw className="h-4 w-4" />
+                {loading ? "Refreshing…" : "Refresh"}
+              </button>
+            }
+          />
 
-          <p className="text-gray-600 mt-2">
-            Manage Ustaads, bookings, users and platform operations.
+          {error && <ErrorBanner message={error} retry={load} />}
+
+          <Section title="Needs attention" cards={attention} loading={loading} />
+          <Section title="Bookings" cards={bookings} loading={loading} />
+          <Section title="Totals" cards={totals} loading={loading} />
+
+          {/* Said plainly rather than left as a gap someone has to notice:
+              money and app installs are not in this database at all. */}
+          <p className="mt-6 text-sm text-[var(--text-secondary)]">
+            Revenue and commission totals are not shown here — no endpoint
+            aggregates them yet. App install counts live in the Play Console,
+            not in this database.
           </p>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div className="mb-6 rounded-xl bg-red-50 border border-red-200 p-4 flex items-start gap-3 text-red-700">
-            <AlertCircle className="w-5 h-5 mt-0.5" />
-            <p>{error}</p>
-          </div>
-        )}
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Pending Ustaads</p>
-                <h2 className="text-3xl font-bold mt-1">
-                  {loading ? "..." : stats?.pendingUstaads ?? "—"}
-                </h2>
-              </div>
-
-              <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-                <Clock className="text-[var(--brand)] w-6 h-6" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Approved Ustaads</p>
-                <h2 className="text-3xl font-bold mt-1">
-                  {loading ? "..." : stats?.approvedUstaads ?? "—"}
-                </h2>
-              </div>
-
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                <CheckCircle className="text-green-600 w-6 h-6" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">Total Users</p>
-                <h2 className="text-3xl font-bold mt-1">
-                  {loading ? "..." : stats?.totalUsers ?? "—"}
-                </h2>
-              </div>
-
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <Users className="text-blue-600 w-6 h-6" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Action Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Ustaad Approvals
-          </h2>
-
-          <p className="text-gray-600 mt-2">
-            Review newly registered Ustaads and approve or reject them before
-            they start receiving jobs.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 mt-6">
-            <Link
-              href="/admin/ustaads"
-              className="inline-flex justify-center bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white px-5 py-3 rounded-lg font-semibold"
-            >
-              Open Pending Ustaads
-            </Link>
-
-            <button
-              onClick={fetchDashboardData}
-              disabled={loading}
-              className="inline-flex justify-center bg-white border border-gray-200 text-gray-700 hover:border-[var(--brand)] hover:text-[var(--brand)] px-5 py-3 rounded-lg font-semibold disabled:opacity-50"
-            >
-              {loading ? "Refreshing..." : "Refresh"}
-            </button>
-          </div>
         </div>
       </div>
-    </div>
+    </AccessGate>
   );
-};
+}
 
-export default AdminDashboardPage;
+function Section({
+  title,
+  cards,
+  loading,
+}: {
+  title: string;
+  cards: Card[];
+  loading: boolean;
+}) {
+  return (
+    <section className="mb-6">
+      <h2 className="mb-3 text-xs font-bold tracking-[0.16em] text-[var(--text-secondary)] uppercase">
+        {title}
+      </h2>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => (
+          <CountCard key={card.label} card={card} loading={loading} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CountCard({ card, loading }: { card: Card; loading: boolean }) {
+  const urgent = Boolean(card.urgentWhenNonZero && card.value);
+  return (
+    <Link
+      href={card.href}
+      className={`block p-5 transition-colors hover:border-[var(--brand)] ${
+        urgent
+          ? "rounded-2xl border border-[var(--urgent)] bg-[var(--urgent-soft)]"
+          : panelClass
+      }`}
+    >
+      <p
+        className={`text-sm font-semibold ${
+          urgent ? "text-[var(--urgent)]" : "text-[var(--text-secondary)]"
+        }`}
+      >
+        {card.label}
+      </p>
+      <p
+        className={`mt-2 text-4xl font-bold tabular-nums ${
+          urgent ? "text-[var(--urgent)]" : "text-[var(--foreground)]"
+        }`}
+      >
+        {loading ? "…" : (card.value ?? "—")}
+      </p>
+      {card.hint && (
+        <p className="mt-2 text-xs text-[var(--text-secondary)]">{card.hint}</p>
+      )}
+    </Link>
+  );
+}
