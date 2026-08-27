@@ -10,6 +10,7 @@ import {
   CalendarDays,
   BriefcaseBusiness,
   ListTodo,
+  Inbox,
 } from "lucide-react";
 
 export type AdminNavItem = {
@@ -30,7 +31,8 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     href: "/admin/settlements/nightly",
     icon: CalendarDays,
   },
-  { label: "Support", href: "/admin/support", icon: LifeBuoy },
+  { label: "Support Inbox", href: "/admin/inbox", icon: Inbox },
+  { label: "Support Tickets", href: "/admin/support", icon: LifeBuoy },
   { label: "Delete User", href: "/admin/delete-user", icon: UserMinus },
   { label: "OTP Diagnostics", href: "/admin/otp", icon: KeyRound },
 ];
