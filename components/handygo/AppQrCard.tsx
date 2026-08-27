@@ -31,7 +31,7 @@ export default function AppQrCard({
           height={32}
           className="rounded-lg flex-shrink-0"
         />
-        <span className="font-bold text-lg tracking-tight" style={{ color: "#DB6234" }}>
+        <span className="font-bold text-lg tracking-tight" style={{ color: "var(--brand)" }}>
           Handygo
         </span>
       </div>
@@ -39,7 +39,7 @@ export default function AppQrCard({
       {/* QR code */}
       <div
         className="flex items-center justify-center p-4 rounded-xl mb-6"
-        style={{ background: "#f5e8e0" }}
+        style={{ background: "var(--brand-light)" }}
       >
         <div className="bg-white p-3 rounded-lg">
           <QRCodeSVG
@@ -63,7 +63,7 @@ export default function AppQrCard({
         <div className="flex justify-center mb-6">
           <span
             className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full"
-            style={{ background: "#f5e8e0", color: "#DB6234" }}
+            style={{ background: "var(--brand-light)", color: "var(--brand)" }}
           >
             iOS coming soon
           </span>

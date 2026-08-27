@@ -25,7 +25,7 @@ export default function Header() {
             className="rounded-lg"
             priority
           />
-          <span className="font-bold text-lg tracking-tight" style={{ color: "#DB6234" }}>
+          <span className="font-bold text-lg tracking-tight" style={{ color: "var(--brand)" }}>
             Handygo
           </span>
         </Link>

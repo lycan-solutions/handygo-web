@@ -39,14 +39,14 @@ export default function AppSmartLinkPage() {
       <main className="min-h-screen flex flex-col items-center justify-center gap-4 px-5 bg-white text-center">
         <span
           className="w-10 h-10 rounded-full border-[3px] border-zinc-200 animate-spin"
-          style={{ borderTopColor: "#DB6234" }}
+          style={{ borderTopColor: "var(--brand)" }}
           aria-hidden
         />
         <p className="text-sm text-zinc-500">Taking you to Handygo…</p>
         <a
           href={PLAY_STORE_URL}
           className="text-sm font-semibold"
-          style={{ color: "#DB6234" }}
+          style={{ color: "var(--brand)" }}
         >
           Tap here if you&apos;re not redirected
         </a>
@@ -67,7 +67,7 @@ export default function AppSmartLinkPage() {
           />
           <span
             className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-5"
-            style={{ background: "#f5e8e0", color: "#DB6234" }}
+            style={{ background: "var(--brand-light)", color: "var(--brand)" }}
           >
             iOS App — Coming Soon
           </span>
