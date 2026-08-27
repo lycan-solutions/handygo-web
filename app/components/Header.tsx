@@ -5,8 +5,9 @@ import { useState } from "react";
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Privacy", href: "/privacy" },
-  { label: "Delete Account", href: "/delete-account" },
+  { label: "Services", href: "/services" },
+  { label: "How it works", href: "/how-it-works" },
+  { label: "For Ustaads", href: "/become-an-ustaad" },
   { label: "Contact", href: "mailto:support@handygo.ai" },
 ];
 
