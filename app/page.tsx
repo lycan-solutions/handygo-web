@@ -77,7 +77,7 @@ function FeatureCard({
     <div className="flex gap-4 items-start py-5 border-b border-zinc-100 last:border-0">
       <div
         className="mt-0.5 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: "#f5e8e0", color: "#DB6234" }}
+        style={{ background: "var(--brand-light)", color: "var(--brand)" }}
       >
         {icon}
       </div>
@@ -93,7 +93,7 @@ function StepBadge({ n }: { n: number }) {
   return (
     <span
       className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-      style={{ background: "#DB6234" }}
+      style={{ background: "var(--brand)" }}
     >
       {n}
     </span>
@@ -120,8 +120,8 @@ const SERVICES = [
     name: "Handyman",
     desc: "General home repairs, assembly & odd jobs",
     image: "/images/services/handyman.jpg",
-    gradient: "from-orange-50 to-amber-100",
-    accent: "#DB6234",
+    gradient: "from-slate-50 to-slate-100",
+    accent: "#475569",
   },
   {
     name: "Deep Cleaning",
@@ -182,7 +182,7 @@ function ServicesSection() {
         <div className="mb-12">
           <span
             className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-            style={{ background: "#f5e8e0", color: "#DB6234" }}
+            style={{ background: "var(--brand-light)", color: "var(--brand)" }}
           >
             What we cover
           </span>
@@ -244,19 +244,19 @@ export default function HomePage() {
           <div
             aria-hidden
             className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full opacity-10 blur-3xl pointer-events-none"
-            style={{ background: "#DB6234" }}
+            style={{ background: "var(--brand)" }}
           />
           <div className="relative max-w-6xl mx-auto">
             <div className="max-w-2xl">
               <span
                 className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-6"
-                style={{ background: "#f5e8e0", color: "#DB6234" }}
+                style={{ background: "var(--brand-light)", color: "var(--brand)" }}
               >
                 On-Demand Home Services
               </span>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-zinc-900 leading-tight tracking-tight mb-6">
                 Home repairs,{" "}
-                <span style={{ color: "#DB6234" }}>done right.</span>
+                <span style={{ color: "var(--brand)" }}>done right.</span>
                 <br />
                 Book in minutes.
               </h1>
@@ -268,7 +268,7 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-4">
                 <div
                   className="flex items-center gap-3 px-6 py-3.5 rounded-xl font-semibold text-white text-sm cursor-default select-none"
-                  style={{ background: "#DB6234" }}
+                  style={{ background: "var(--brand)" }}
                 >
                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                     <path d="M3 18.5v-13A1.5 1.5 0 0 1 4.914 4.1l12.5 6.5a1.5 1.5 0 0 1 0 2.8l-12.5 6.5A1.5 1.5 0 0 1 3 18.5z" />
@@ -288,14 +288,14 @@ export default function HomePage() {
             <div
               aria-hidden
               className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-64 h-[460px] rounded-[2.5rem] border-4 border-zinc-200 overflow-hidden shadow-2xl"
-              style={{ background: "linear-gradient(160deg, #fff7f3 0%, #fde8d9 100%)" }}
+              style={{ background: "linear-gradient(160deg, var(--brand-light) 0%, var(--surface-subtle) 100%)" }}
             >
               <div className="pt-10 px-5 flex flex-col gap-3">
                 <div className="h-2 w-20 rounded-full bg-zinc-300" />
                 <div className="h-2 w-32 rounded-full bg-zinc-200" />
                 <div
                   className="mt-4 rounded-xl p-3 text-xs text-white font-semibold"
-                  style={{ background: "#DB6234" }}
+                  style={{ background: "var(--brand)" }}
                 >
                   New bid received
                 </div>
@@ -307,7 +307,7 @@ export default function HomePage() {
                 </div>
                 <div className="flex gap-1.5 mt-2">
                   {[1, 2, 3, 4, 5].map((s) => (
-                    <svg key={s} viewBox="0 0 12 12" fill="#DB6234" className="w-4 h-4">
+                    <svg key={s} viewBox="0 0 12 12" style={{ fill: "var(--brand)" }} className="w-4 h-4">
                       <polygon points="6 1 7.5 4.5 11 5 8.5 7.5 9 11 6 9.5 3 11 3.5 7.5 1 5 4.5 4.5 6 1" />
                     </svg>
                   ))}
@@ -318,7 +318,7 @@ export default function HomePage() {
         </section>
 
         {/* Stats strip */}
-        <section style={{ background: "#DB6234" }} className="py-10 px-5 sm:px-8">
+        <section style={{ background: "var(--brand)" }} className="py-10 px-5 sm:px-8">
           <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-white text-center">
             {[
               { v: "Fast", l: "Booking in minutes" },
@@ -382,7 +382,7 @@ export default function HomePage() {
             <div>
               <span
                 className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-5"
-                style={{ background: "#f5e8e0", color: "#DB6234" }}
+                style={{ background: "var(--brand-light)", color: "var(--brand)" }}
               >
                 For Customers
               </span>
@@ -420,7 +420,7 @@ export default function HomePage() {
             <div>
               <span
                 className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-5"
-                style={{ background: "#f5e8e0", color: "#DB6234" }}
+                style={{ background: "var(--brand-light)", color: "var(--brand)" }}
               >
                 For Workers
               </span>
@@ -467,12 +467,12 @@ export default function HomePage() {
                 <div
                   aria-hidden
                   className="absolute inset-0 scale-110 rounded-[3rem] blur-3xl opacity-20"
-                  style={{ background: "#DB6234" }}
+                  style={{ background: "var(--brand)" }}
                 />
                 {/* Phone shell */}
                 <div
                   className="relative w-[220px] sm:w-[240px] h-[460px] sm:h-[500px] rounded-[2.75rem] border-[3px] border-zinc-200 shadow-2xl overflow-hidden flex flex-col"
-                  style={{ background: "linear-gradient(160deg, #fff7f3 0%, #fde8d9 60%, #fff 100%)" }}
+                  style={{ background: "linear-gradient(160deg, var(--brand-light) 0%, var(--surface-subtle) 60%, var(--surface) 100%)" }}
                 >
                   {/* Status bar */}
                   <div className="flex items-center justify-between px-5 pt-4 pb-2">
@@ -490,7 +490,7 @@ export default function HomePage() {
                       height={22}
                       className="rounded-md"
                     />
-                    <span className="text-sm font-bold" style={{ color: "#DB6234" }}>Handygo</span>
+                    <span className="text-sm font-bold" style={{ color: "var(--brand)" }}>Handygo</span>
                   </div>
 
                   {/* App body */}
@@ -498,7 +498,7 @@ export default function HomePage() {
                     <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">Status</p>
                     <div
                       className="rounded-xl px-3 py-2.5 text-white"
-                      style={{ background: "#DB6234" }}
+                      style={{ background: "var(--brand)" }}
                     >
                       <p className="text-[10px] font-semibold opacity-80 mb-0.5">NEW</p>
                       <p className="text-xs font-bold">New worker bid received</p>
@@ -513,7 +513,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex gap-1 pt-1">
                       {[1, 2, 3, 4, 5].map((s) => (
-                        <svg key={s} viewBox="0 0 12 12" fill="#DB6234" className="w-3.5 h-3.5">
+                        <svg key={s} viewBox="0 0 12 12" style={{ fill: "var(--brand)" }} className="w-3.5 h-3.5">
                           <polygon points="6 1 7.5 4.5 11 5 8.5 7.5 9 11 6 9.5 3 11 3.5 7.5 1 5 4.5 4.5 6 1" />
                         </svg>
                       ))}
@@ -528,13 +528,13 @@ export default function HomePage() {
             <div className="flex-1 text-center lg:text-center">
               <span
                 className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-5"
-                style={{ background: "#f5e8e0", color: "#DB6234" }}
+                style={{ background: "var(--brand-light)", color: "var(--brand)" }}
               >
                 App Launch
               </span>
               <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 tracking-tight leading-tight mb-5">
                 Handygo is coming soon<br className="hidden sm:block" /> on{" "}
-                <span style={{ color: "#DB6234" }}>Google Play</span>
+                <span style={{ color: "var(--brand)" }}>Google Play</span>
               </h2>
               <p className="text-zinc-500 leading-relaxed   mx-auto lg:mx-0 mb-8" style={{ textAlign: "center" }}>
                 We&apos;re preparing the first public release for Android. The app will let
@@ -544,7 +544,7 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-4 justify-center lg:justify-center">
                 <div
                   className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-white text-sm cursor-default select-none"
-                  style={{ background: "#DB6234" }}
+                  style={{ background: "var(--brand)" }}
                 >
                   {/* Play icon */}
                   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">

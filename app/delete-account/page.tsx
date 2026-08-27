@@ -19,7 +19,7 @@ function Step({
     <div className="flex gap-4 items-start">
       <span
         className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0 mt-0.5"
-        style={{ background: "#DB6234" }}
+        style={{ background: "var(--brand)" }}
       >
         {n}
       </span>
@@ -48,7 +48,7 @@ export default function DeleteAccountPage() {
           <div className="max-w-3xl mx-auto">
             <span
               className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-              style={{ background: "#f5e8e0", color: "#DB6234" }}
+              style={{ background: "var(--brand-light)", color: "var(--brand)" }}
             >
               Account
             </span>
@@ -69,7 +69,7 @@ export default function DeleteAccountPage() {
             <div className="flex items-center gap-3 mb-6">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: "#f5e8e0", color: "#DB6234" }}
+                style={{ background: "var(--brand-light)", color: "var(--brand)" }}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                   <rect x="5" y="2" width="14" height="20" rx="2" />
@@ -104,7 +104,7 @@ export default function DeleteAccountPage() {
             <div className="flex items-center gap-3 mb-6">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: "#f5e8e0", color: "#DB6234" }}
+                style={{ background: "var(--brand-light)", color: "var(--brand)" }}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -122,7 +122,7 @@ export default function DeleteAccountPage() {
               className="rounded-xl border border-zinc-100 p-5 sm:p-6 mb-6"
               style={{ background: "#faf8f6" }}
             >
-              <InfoRow label="Send email to" value={<a href="mailto:support@handygo.ai" style={{ color: "#DB6234" }} className="font-medium">support@handygo.ai</a>} />
+              <InfoRow label="Send email to" value={<a href="mailto:support@handygo.ai" style={{ color: "var(--brand)" }} className="font-medium">support@handygo.ai</a>} />
               <InfoRow
                 label="Subject line"
                 value={
@@ -137,7 +137,7 @@ export default function DeleteAccountPage() {
             <a
               href="mailto:support@handygo.ai?subject=Handygo%20Account%20Deletion%20Request&body=Hello%2C%0A%0AI%20would%20like%20to%20request%20the%20deletion%20of%20my%20Handygo%20account.%0A%0ARegistered%20phone%20number%3A%20%0ARole%20(client%2Fworker)%3A%20%0A%0AThank%20you."
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white text-sm transition-opacity hover:opacity-90"
-              style={{ background: "#DB6234" }}
+              style={{ background: "var(--brand)" }}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -191,7 +191,7 @@ export default function DeleteAccountPage() {
                 <div key={i} className="flex gap-3 items-start text-sm">
                   <span
                     className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{ background: "#f5e8e0", color: "#DB6234" }}
+                    style={{ background: "var(--brand-light)", color: "var(--brand)" }}
                   >
                     {item.icon}
                   </span>
@@ -209,7 +209,7 @@ export default function DeleteAccountPage() {
             <a
               href="mailto:support@handygo.ai"
               className="text-sm font-semibold"
-              style={{ color: "#DB6234" }}
+              style={{ color: "var(--brand)" }}
             >
               Contact us at support@handygo.ai
             </a>

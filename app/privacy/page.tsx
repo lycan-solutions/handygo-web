@@ -22,7 +22,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Li({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex gap-2.5">
-      <span className="mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#DB6234" }} />
+      <span className="mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "var(--brand)" }} />
       <span>{children}</span>
     </li>
   );
@@ -39,7 +39,7 @@ export default function PrivacyPage() {
           <div className="max-w-3xl mx-auto">
             <span
               className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full mb-4"
-              style={{ background: "#f5e8e0", color: "#DB6234" }}
+              style={{ background: "var(--brand-light)", color: "var(--brand)" }}
             >
               Legal
             </span>
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
             </h1>
             <p className="text-zinc-500 text-sm">
               Effective date: <strong>June 2, 2026</strong> &nbsp;·&nbsp; App: Handygo &nbsp;·&nbsp;{" "}
-              <a href="mailto:support@handygo.ai" style={{ color: "#DB6234" }}>
+              <a href="mailto:support@handygo.ai" style={{ color: "var(--brand)" }}>
                 support@handygo.ai
               </a>
             </p>
@@ -144,7 +144,7 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-3">
               No system is 100% secure. While we strive to protect your data, we cannot guarantee absolute security. Please contact us immediately at{" "}
-              <a href="mailto:support@handygo.ai" style={{ color: "#DB6234" }}>
+              <a href="mailto:support@handygo.ai" style={{ color: "var(--brand)" }}>
                 support@handygo.ai
               </a>{" "}
               if you suspect any unauthorized use of your account.
@@ -161,7 +161,7 @@ export default function PrivacyPage() {
               </Li>
               <Li>
                 <strong>By email</strong> — send a request to{" "}
-                <a href="mailto:support@handygo.ai" style={{ color: "#DB6234" }}>
+                <a href="mailto:support@handygo.ai" style={{ color: "var(--brand)" }}>
                   support@handygo.ai
                 </a>{" "}
                 with the subject line <em>&quot;Handygo Account Deletion Request&quot;</em>, including your registered phone number and role (client or worker).
@@ -176,7 +176,7 @@ export default function PrivacyPage() {
           <Section title="8. Children's Privacy">
             <p>
               Handygo is not intended for use by individuals under the age of 18. We do not knowingly collect personal information from children. If you believe a minor has provided us with personal data, please contact us at{" "}
-              <a href="mailto:support@handygo.ai" style={{ color: "#DB6234" }}>
+              <a href="mailto:support@handygo.ai" style={{ color: "var(--brand)" }}>
                 support@handygo.ai
               </a>{" "}
               and we will promptly delete the information.
@@ -198,7 +198,7 @@ export default function PrivacyPage() {
               <a
                 href="mailto:support@handygo.ai"
                 className="font-medium"
-                style={{ color: "#DB6234" }}
+                style={{ color: "var(--brand)" }}
               >
                 support@handygo.ai
               </a>

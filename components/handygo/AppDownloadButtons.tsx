@@ -34,7 +34,7 @@ export default function AppDownloadButtons({
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-2.5 px-5 py-3 rounded-xl font-semibold text-white text-sm transition-transform hover:scale-[1.02] active:scale-[0.98]"
-        style={{ background: "#DB6234" }}
+        style={{ background: "var(--brand)" }}
       >
         <PlayIcon />
         Get it on Google Play
