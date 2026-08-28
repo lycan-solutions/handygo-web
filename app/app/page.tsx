@@ -59,7 +59,7 @@ export default function AppSmartLinkPage() {
       <main className="min-h-screen flex flex-col items-center justify-center px-5 py-16 bg-white">
         <div className="max-w-sm w-full text-center">
           <Image
-            src="/images/logo-green.png"
+            src="/images/logo-teal.png"
             alt="Handygo logo"
             width={56}
             height={56}

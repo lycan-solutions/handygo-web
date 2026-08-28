@@ -25,7 +25,7 @@ export default function AppQrCard({
       {/* Brand */}
       <div className="flex items-center gap-2.5 mb-6">
         <Image
-          src="/images/logo-green.png"
+          src="/images/logo-teal.png"
           alt="Handygo logo"
           width={32}
           height={32}

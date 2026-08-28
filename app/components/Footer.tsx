@@ -14,7 +14,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2.5 mb-4">
               <Image
-                src="/images/logo-green.png"
+                src="/images/logo-ivory.png"
                 alt="Handygo logo"
                 width={36}
                 height={36}

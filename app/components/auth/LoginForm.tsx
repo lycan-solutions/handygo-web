@@ -76,7 +76,7 @@ const LoginForm = () => {
     <div className="w-[100%] p-3 md:p-8 flex md:my-10 justify-center">
       <form onSubmit={handleSubmit} className="w-[100%] h-[auto] bg-white rounded-lg shadow-md p-2 md:p-6 text-[1.2rem] flex flex-col gap-4 md:w-[400px]">
         <div className="flex flex-row items-center gap-0 justify-center">
-          <img src="/images/logo-green.png" alt="Logo" className="w-10 h-10 mr-2 " />
+          <img src="/images/logo-teal.png" alt="Logo" className="w-10 h-10 mr-2 " />
           <p className="text-2xl font-bold text-[var(--brand)]">Handygo</p>
         </div>
         <p className="text-4xl font-bold">Welcome back!</p>
