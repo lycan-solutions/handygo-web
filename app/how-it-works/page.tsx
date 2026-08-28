@@ -102,15 +102,15 @@ export default function HowItWorksPage() {
             </h1>
             <p className="text-zinc-600 text-base leading-7 max-w-2xl">
               Finding someone to fix a leak should not mean three phone calls
-              and a price you only hear once the work is finished. Here is
-              exactly what happens on Handygo.
+              and a price you only hear once the work is finished. Scroll down
+              and the app screen moves with you.
             </p>
           </div>
         </div>
 
-        <section className="max-w-5xl mx-auto px-5 sm:px-8 py-14">
+        <section className="max-w-5xl mx-auto px-5 sm:px-8 py-10 sm:py-14">
           <StepTour steps={STEPS} />
-          <p className="mt-10 text-xs leading-6 text-zinc-500 max-w-2xl">
+          <p className="mt-12 text-xs leading-6 text-zinc-500 max-w-2xl">
             Screens from the Handygo app. The rates inside them are examples and
             are blurred on purpose — the app shows you the real amount before
             you confirm anything.
