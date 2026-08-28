@@ -484,7 +484,7 @@ export default function HomePage() {
                   {/* App header */}
                   <div className="px-4 pt-2 pb-3 flex items-center gap-2 border-b border-zinc-100">
                     <Image
-                      src="/images/logo-green.png"
+                      src="/images/logo-teal.png"
                       alt="Handygo"
                       width={22}
                       height={22}
